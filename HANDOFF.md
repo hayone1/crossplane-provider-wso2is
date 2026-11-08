@@ -26,9 +26,10 @@ remain). The repository is on GitHub with its first commit. The Upjet bug is rep
   resolution (namespace and source rules), the configuration checks, that all 52 resources
   report a read without an ID as missing, and identity provider secrets through Upjet's secret
   code.
-* **End to end against the lab with v0.1.2:** `test/e2e/run.sh` (every example) was running at
-  the end of the session; the result is recorded below if it finished
-  (log: `_debug/e2e.log`).
+* **End to end against the lab with v0.1.2** (2026-11-08): `test/e2e/run.sh` passed all 106
+  manifests (every example in both scopes, with the organization and tenant fixtures), with no
+  update loops. The lab was clean afterwards (log: `_debug/e2e.log`).
+* **GitHub:** CI, Security, Scorecard and End to End (WSO2 in Docker) pass on `main`.
 * **End to end against the lab with v0.1.1** (`test/e2e/run.sh`: kind, CRDs, provider outside
   the cluster, update-loop check after a poll, delete) on 2026-11-07: all 52 cluster-scoped examples, all 53
   namespaced examples, the organization example in both scopes (fixture: M2M application with
@@ -64,7 +65,7 @@ remain). The repository is on GitHub with its first commit. The Upjet bug is rep
   then takes about 3.5 minutes with a peak of 1.9 GB. Another agent may clear the Go build
   cache; a build that fails with "package ... is not in std" was hit by that and only needs a
   rerun.
-* **kind:** no clusters are running. `test/e2e/run.sh` creates `provider-wso2is-e2e` and
+* **kind:** no clusters are running (checked 2026-11-08). `test/e2e/run.sh` creates `provider-wso2is-e2e` and
   `make local-deploy` creates `local-dev`. Give `make local-deploy` its own `KUBECONFIG`, or it
   switches the user's current context.
 * **Disk:** build tools live in `.cache/tools` (600 MB, kept). `_output/` and the provider image
@@ -92,7 +93,13 @@ remain). The repository is on GitHub with its first commit. The Upjet bug is rep
   and a tested fix; the reproduction is in `_debug/upjet-src`). Linked from `config/idp.go` and
   `docs/behaviour.md`.
 * Created the public repository https://github.com/hayone1/crossplane-provider-wso2is and
-  pushed the first commit. `RELEASE_ENABLED` is not set, so nothing is published.
+  pushed the first commit. `RELEASE_ENABLED` is not set, so nothing is published. Settings
+  copied from the Hostinger repository: delete branches after merge, auto-merge, no merge
+  commits, Dependabot alerts and security updates (needed for the dependency-review job).
+* gitleaks flagged two placeholders in `docs/organizations.md` (`admin:change-me` in a curl
+  command and an example API ID). The docs now use `$WSO2IS_USERNAME:$WSO2IS_PASSWORD` and
+  `ID-OF-THE-USERS-API`, and the first commit was amended and force-pushed. The force push
+  closed Dependabot's first two pull requests; it opens them again on its next weekly run.
 * crossplane-provider-hostinger: fixed `.github/renovate.json5` (a rename had turned
   `datasourceTemplate` and similar keys into `datasourceHostinger`, so Renovate's custom managers
   did nothing). Merged as PR #11. Renovate has never run on that repository, so the Renovate
@@ -100,16 +107,14 @@ remain). The repository is on GitHub with its first commit. The Upjet bug is rep
 
 ## Open items
 
-1. Check the result of the end-to-end run with v0.1.2 (`_debug/e2e.log`) if it is not recorded
-   above.
-2. Repository secrets, when the user wants to publish: `XPKG_MIRROR_ACCESS_ID` and
+1. Repository secrets, when the user wants to publish: `XPKG_MIRROR_ACCESS_ID` and
    `XPKG_MIRROR_TOKEN` (Upbound mirror) and, for `/test-examples`,
    `UPTEST_CLOUD_CREDENTIALS` (a credentials JSON object). Then set the repository variable
    `RELEASE_ENABLED=true` and tag a release.
-3. When Upjet fixes issue 810, consider replacing the identity provider workaround in
+2. When Upjet fixes issue 810, consider replacing the identity provider workaround in
    `config/idp.go`. That changes the CRD fields, so it needs a new API version or a breaking
    change note.
-4. Install the Renovate GitHub App for the repositories if the user wants Renovate (account
+3. Install the Renovate GitHub App for the repositories if the user wants Renovate (account
    setting, ask first). Both repositories also have Dependabot.
 
 ## Known problems
