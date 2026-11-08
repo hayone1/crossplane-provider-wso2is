@@ -1,0 +1,12 @@
+# A sub-organization for a business customer.
+apiVersion: organization.wso2is.m.crossplane.io/v1alpha1
+kind: Organization
+metadata:
+  namespace: default
+  name: partner
+spec:
+  forProvider:
+    name: Partner Inc
+    description: Reseller in the EU
+    attributes:
+      region: eu-west

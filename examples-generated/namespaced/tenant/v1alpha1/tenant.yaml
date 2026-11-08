@@ -1,0 +1,35 @@
+apiVersion: tenant.wso2is.m.crossplane.io/v1alpha1
+kind: Tenant
+metadata:
+  annotations:
+    meta.upbound.io/example-id: tenant/v1alpha1/tenant
+  labels:
+    testing.upbound.io/example-name: acme
+  name: acme
+  namespace: default
+spec:
+  forProvider:
+    domain: acme.com
+    ownerEmail: it@acme.com
+    ownerFirstName: Acme
+    ownerLastName: Admin
+    ownerPasswordSecretRef:
+      key: example-key
+      name: example-secret
+    ownerUsername: admin
+
+---
+
+apiVersion: identity.wso2is.m.crossplane.io/v1alpha1
+kind: Group
+metadata:
+  annotations:
+    meta.upbound.io/example-id: tenant/v1alpha1/tenant
+  labels:
+    testing.upbound.io/example-name: acme_staff
+  name: acme-staff
+  namespace: default
+spec:
+  forProvider:
+    name: staff
+    provider: ${wso2is.acme}

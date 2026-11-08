@@ -1,0 +1,13 @@
+# The ClusterProviderConfig that namespaced managed resources use by default. A cluster
+# administrator creates it, and every namespace can use it.
+apiVersion: wso2is.m.crossplane.io/v1beta1
+kind: ClusterProviderConfig
+metadata:
+  name: default
+spec:
+  credentials:
+    source: Secret
+    secretRef:
+      namespace: crossplane-system
+      name: wso2is-creds
+      key: credentials

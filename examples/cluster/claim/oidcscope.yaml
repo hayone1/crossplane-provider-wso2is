@@ -1,0 +1,35 @@
+# An OpenID Connect scope. Applications that request the scope "membership" receive the
+# claim "membership_level".
+apiVersion: claim.wso2is.crossplane.io/v1alpha1
+kind: OIDCScope
+metadata:
+  name: membership
+spec:
+  forProvider:
+    name: membership
+    displayName: Membership
+    description: The customer's membership level
+    claimsRefs:
+      - name: membership-level-oidc
+---
+apiVersion: claim.wso2is.crossplane.io/v1alpha1
+kind: ExternalClaim
+metadata:
+  name: membership-level-oidc
+spec:
+  forProvider:
+    dialectUri: http://wso2.org/oidc/claim
+    claimUri: membership_level
+    mappedLocalClaimUriRef:
+      name: membership-level
+---
+apiVersion: claim.wso2is.crossplane.io/v1alpha1
+kind: Claim
+metadata:
+  name: membership-level
+spec:
+  forProvider:
+    claimUri: http://wso2.org/claims/membershipLevel
+    displayName: Membership level
+    attributeMappings:
+      PRIMARY: membershipLevel

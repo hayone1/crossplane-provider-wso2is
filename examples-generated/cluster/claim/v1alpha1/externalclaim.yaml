@@ -1,0 +1,17 @@
+apiVersion: claim.wso2is.crossplane.io/v1alpha1
+kind: ExternalClaim
+metadata:
+  annotations:
+    meta.upbound.io/example-id: claim/v1alpha1/externalclaim
+  labels:
+    testing.upbound.io/example-name: department
+  name: department
+spec:
+  forProvider:
+    claimUri: department
+    dialectUriSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    mappedLocalClaimUriSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example

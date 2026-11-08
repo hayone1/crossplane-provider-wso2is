@@ -1,0 +1,33 @@
+apiVersion: meta.pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-wso2is
+  annotations:
+    meta.crossplane.io/maintainer: "hayone1 <boluwatife.morawo@stu.cu.edu.ng>"
+    meta.crossplane.io/source: "github.com/hayone1/crossplane-provider-wso2is"
+    meta.crossplane.io/license: "Apache-2.0"
+    friendly-name.meta.crossplane.io: Community provider for WSO2 Identity Server
+    meta.crossplane.io/iconURI: https://raw.githubusercontent.com/hayone1/crossplane-provider-wso2is/main/extensions/icons/icon.svg
+    meta.crossplane.io/description: |
+      Manage WSO2 Identity Server 7.3 with Crossplane: applications, users, groups,
+      roles, claims, identity providers, organizations, tenants, notifications, branding
+      and tenant-wide settings. Generated with Upjet from the WSO2 Identity Server
+      Terraform provider. Independent community project, not affiliated with,
+      sponsored or endorsed by WSO2.
+    meta.crossplane.io/readme: |
+      This Crossplane provider manages WSO2 Identity Server 7.3. Upjet generated it from
+      the Terraform provider at https://github.com/hayone1/terraform-provider-wso2is.
+      The provider runs the Terraform provider in its own process, so the package needs
+      no Terraform binary.
+
+      It offers 52 managed resources in two API variants: cluster-scoped
+      (*.wso2is.crossplane.io) and namespaced (*.wso2is.m.crossplane.io).
+
+      Documentation and examples: https://github.com/hayone1/crossplane-provider-wso2is
+
+      This provider is an independent community project. It is not affiliated with,
+      sponsored or endorsed by WSO2. WSO2 is a trademark of its owner, and this text uses
+      it only to name the product that the provider works with.
+spec:
+  capabilities:
+    - SafeStart

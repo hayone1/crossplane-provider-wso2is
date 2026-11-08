@@ -1,0 +1,30 @@
+# The complete list of users and groups that have a role. The provider removes every
+# assignment that the lists do not name, so use only one RoleAssignment for each role.
+apiVersion: identity.wso2is.crossplane.io/v1alpha1
+kind: RoleAssignment
+metadata:
+  name: support
+spec:
+  forProvider:
+    roleIdRef:
+      name: support
+    groupIdsRefs:
+      - name: support
+---
+apiVersion: identity.wso2is.crossplane.io/v1alpha1
+kind: Role
+metadata:
+  name: support
+spec:
+  forProvider:
+    name: support
+    permissions:
+      - internal_user_mgt_view
+---
+apiVersion: identity.wso2is.crossplane.io/v1alpha1
+kind: Group
+metadata:
+  name: support
+spec:
+  forProvider:
+    name: support

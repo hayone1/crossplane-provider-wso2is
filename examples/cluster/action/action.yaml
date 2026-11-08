@@ -1,0 +1,32 @@
+# Calls your service before the server issues an access token, so that the service can
+# add claims. The service authenticates the call with an API key from the Secret.
+# For API_KEY, the Secret holds the header name and the key.
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: crossplane-system
+  name: token-claims-api-key
+stringData:
+  header: X-API-Key
+  value: replace-with-your-api-key
+---
+apiVersion: action.wso2is.crossplane.io/v1alpha1
+kind: Action
+metadata:
+  name: token-claims
+spec:
+  forProvider:
+    type: pre_issue_access_token
+    name: Add tenant claims
+    endpointUri: https://hooks.example.com/pre-issue-access-token
+    authenticationType: API_KEY
+    authenticationPropertiesSecretRef:
+      namespace: crossplane-system
+      name: token-claims-api-key
+    allowedHeaders:
+      - x-request-id
+    rules:
+      - expressions:
+          - field: grantType
+            operator: equals
+            value: client_credentials

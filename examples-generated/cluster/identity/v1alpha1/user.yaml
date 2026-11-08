@@ -1,0 +1,23 @@
+apiVersion: identity.wso2is.crossplane.io/v1alpha1
+kind: User
+metadata:
+  annotations:
+    meta.upbound.io/example-id: identity/v1alpha1/user
+  labels:
+    testing.upbound.io/example-name: alice
+  name: alice
+spec:
+  forProvider:
+    attributes:
+      urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department: Engineering
+      urn:scim:wso2:schema:country: Sri Lanka
+    email: alice@example.com
+    emails:
+      work: alice@corp.example
+    familyName: Smith
+    givenName: Alice
+    password_wo: ${var.alice_password}
+    password_wo_version: 1
+    phoneNumbers:
+      mobile: "+15551234567"
+    username: alice

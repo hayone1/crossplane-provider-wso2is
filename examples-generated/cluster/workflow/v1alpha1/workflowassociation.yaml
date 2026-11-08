@@ -1,0 +1,32 @@
+apiVersion: workflow.wso2is.crossplane.io/v1alpha1
+kind: WorkflowAssociation
+metadata:
+  annotations:
+    meta.upbound.io/example-id: workflow/v1alpha1/workflowassociation
+  labels:
+    testing.upbound.io/example-name: deletions
+  name: deletions
+spec:
+  forProvider:
+    name: User deletions need approval
+    operation: DELETE_USER
+    workflowIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: approvals
+
+---
+
+apiVersion: workflow.wso2is.crossplane.io/v1alpha1
+kind: Workflow
+metadata:
+  annotations:
+    meta.upbound.io/example-id: workflow/v1alpha1/workflowassociation
+  labels:
+    testing.upbound.io/example-name: approvals
+  name: approvals
+spec:
+  forProvider:
+    name: Administrator approval
+    steps:
+    - roleIdsRefs:
+      - name: wso2is_role

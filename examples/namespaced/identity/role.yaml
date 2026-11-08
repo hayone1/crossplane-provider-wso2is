@@ -1,0 +1,12 @@
+# A role of the organization. Its permissions are scopes of the server's management APIs.
+apiVersion: identity.wso2is.m.crossplane.io/v1alpha1
+kind: Role
+metadata:
+  namespace: default
+  name: user-viewers
+spec:
+  forProvider:
+    name: user-viewers
+    permissions:
+      - internal_user_mgt_view
+      - internal_user_mgt_list

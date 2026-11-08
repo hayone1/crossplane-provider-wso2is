@@ -1,0 +1,16 @@
+# A verifiable credential that holds an employee's name and email address. The claims map
+# credential claim names to claims of the http://wso2.org/vc/claim dialect.
+apiVersion: vc.wso2is.crossplane.io/v1alpha1
+kind: VCTemplate
+metadata:
+  name: employee-badge
+spec:
+  forProvider:
+    identifier: EmployeeBadge
+    displayName: Employee badge
+    format: dc+sd-jwt
+    expiresIn: 31536000
+    claims:
+      given_name: given_name
+      family_name: family_name
+      email: email

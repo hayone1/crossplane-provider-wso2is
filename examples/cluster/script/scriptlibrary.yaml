@@ -1,0 +1,14 @@
+# A JavaScript library that adaptive (conditional) authentication scripts can load.
+apiVersion: script.wso2is.crossplane.io/v1alpha1
+kind: ScriptLibrary
+metadata:
+  name: risk
+spec:
+  forProvider:
+    name: risk.js
+    description: Risk helpers for adaptive authentication
+    content: |
+      function isRisky(score) {
+        return score > 70;
+      }
+      module.exports.isRisky = isRisky;

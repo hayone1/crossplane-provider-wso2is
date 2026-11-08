@@ -1,0 +1,24 @@
+# A second-factor authenticator that your own service implements. The server calls the
+# service with a bearer token from the Secret.
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: default
+  name: branch-pin-endpoint
+stringData:
+  accessToken: replace-with-your-token
+---
+apiVersion: idp.wso2is.m.crossplane.io/v1alpha1
+kind: CustomAuthenticator
+metadata:
+  namespace: default
+  name: branch-pin
+spec:
+  forProvider:
+    name: custom-branch-pin
+    displayName: Branch PIN
+    authenticationType: VERIFICATION
+    endpointUri: https://pin.example.com/authenticate
+    endpointAuthenticationType: BEARER
+    endpointAuthenticationPropertiesSecretRef:
+      name: branch-pin-endpoint

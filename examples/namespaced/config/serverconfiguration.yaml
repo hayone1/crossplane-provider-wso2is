@@ -1,0 +1,11 @@
+# Session settings of the tenant. The values here are the server defaults. When you delete
+# the managed resource, the settings keep their current values.
+apiVersion: config.wso2is.m.crossplane.io/v1alpha1
+kind: ServerConfiguration
+metadata:
+  namespace: default
+  name: server
+spec:
+  forProvider:
+    idleSessionTimeout: 15
+    rememberMePeriod: 20160

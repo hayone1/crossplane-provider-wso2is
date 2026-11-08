@@ -1,0 +1,18 @@
+# The branding of the login and account pages for the whole organization. The preference
+# is a JSON document, the same one that the Console's Branding section stores.
+apiVersion: branding.wso2is.m.crossplane.io/v1alpha1
+kind: BrandingPreference
+metadata:
+  namespace: default
+  name: org
+spec:
+  forProvider:
+    locale: en-US
+    preference: |
+      {
+        "configs": {"isBrandingEnabled": true},
+        "organizationDetails": {"displayName": "Acme", "supportEmail": "support@acme.example"},
+        "images": {"logo": {"imgURL": "https://cdn.acme.example/logo.svg", "altText": "Acme"}},
+        "theme": {"activeTheme": "LIGHT", "LIGHT": {"colors": {"primary": {"main": "#FF7300"}}}},
+        "layout": {"activeLayout": "centered"}
+      }

@@ -1,0 +1,31 @@
+apiVersion: workflow.wso2is.crossplane.io/v1alpha1
+kind: Workflow
+metadata:
+  annotations:
+    meta.upbound.io/example-id: workflow/v1alpha1/workflow
+  labels:
+    testing.upbound.io/example-name: role_changes
+  name: role-changes
+spec:
+  forProvider:
+    description: Changes to roles need two approvals
+    name: Role changes
+    steps:
+    - roleIdsRefs:
+      - name: wso2is_role
+    - roleIdsRefs:
+      - name: security_officers
+
+---
+
+apiVersion: identity.wso2is.crossplane.io/v1alpha1
+kind: Role
+metadata:
+  annotations:
+    meta.upbound.io/example-id: workflow/v1alpha1/workflow
+  labels:
+    testing.upbound.io/example-name: security_officers
+  name: security-officers
+spec:
+  forProvider:
+    name: security-officers

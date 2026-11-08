@@ -1,0 +1,27 @@
+# A user in the primary user store. The password comes from a Secret.
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: default
+  name: alice-password
+stringData:
+  password: Change-Me-Passw0rd!
+---
+apiVersion: identity.wso2is.m.crossplane.io/v1alpha1
+kind: User
+metadata:
+  namespace: default
+  name: alice
+spec:
+  forProvider:
+    username: alice
+    givenName: Alice
+    familyName: Smith
+    email: alice@example.com
+    emails:
+      work: alice@corp.example
+    phoneNumbers:
+      mobile: "+15551234567"
+    passwordSecretRef:
+      name: alice-password
+      key: password

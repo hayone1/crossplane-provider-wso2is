@@ -1,0 +1,13 @@
+# Locks an account after five failed sign-in attempts for 15 minutes. When you delete the
+# managed resource, the provider sets these properties back to their defaults.
+apiVersion: governance.wso2is.crossplane.io/v1alpha1
+kind: GovernanceConnector
+metadata:
+  name: account-lock
+spec:
+  forProvider:
+    name: account.lock.handler
+    properties:
+      account.lock.handler.lock.on.max.failed.attempts.enable: "true"
+      account.lock.handler.On.Failure.Max.Attempts: "5"
+      account.lock.handler.Time: "15"

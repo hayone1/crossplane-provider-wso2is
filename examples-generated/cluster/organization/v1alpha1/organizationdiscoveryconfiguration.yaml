@@ -1,0 +1,12 @@
+apiVersion: organization.wso2is.crossplane.io/v1alpha1
+kind: OrganizationDiscoveryConfiguration
+metadata:
+  annotations:
+    meta.upbound.io/example-id: organization/v1alpha1/organizationdiscoveryconfiguration
+  labels:
+    testing.upbound.io/example-name: this
+  name: this
+spec:
+  forProvider:
+    emailDomainBasedSelfSignUpEnabled: true
+    emailDomainEnabled: true

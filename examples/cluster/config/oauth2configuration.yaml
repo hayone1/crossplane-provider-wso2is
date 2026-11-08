@@ -1,0 +1,9 @@
+# Sends the scopes of JWT access tokens as a JSON array. When you delete the managed
+# resource, the provider restores the server default.
+apiVersion: config.wso2is.crossplane.io/v1alpha1
+kind: OAuth2Configuration
+metadata:
+  name: oauth2
+spec:
+  forProvider:
+    enableJwtScopeAsArray: true

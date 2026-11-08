@@ -1,0 +1,14 @@
+# CORS settings of the server's endpoints. The allowed origins come from each
+# application's oidc.allowedOrigins. When you delete the managed resource, the settings
+# keep their current values.
+apiVersion: config.wso2is.m.crossplane.io/v1alpha1
+kind: CORSConfiguration
+metadata:
+  namespace: default
+  name: cors
+spec:
+  forProvider:
+    supportsCredentials: true
+    exposedHeaders:
+      - Location
+      - X-Trace-Id

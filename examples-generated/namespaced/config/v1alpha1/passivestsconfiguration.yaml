@@ -1,0 +1,12 @@
+apiVersion: config.wso2is.m.crossplane.io/v1alpha1
+kind: PassiveSTSConfiguration
+metadata:
+  annotations:
+    meta.upbound.io/example-id: config/v1alpha1/passivestsconfiguration
+  labels:
+    testing.upbound.io/example-name: this
+  name: this
+  namespace: default
+spec:
+  forProvider:
+    enableRequestSigning: true

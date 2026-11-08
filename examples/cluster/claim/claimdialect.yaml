@@ -1,0 +1,20 @@
+# A custom attribute dialect for a legacy system, with one attribute that maps to the
+# built-in email address claim.
+apiVersion: claim.wso2is.crossplane.io/v1alpha1
+kind: ClaimDialect
+metadata:
+  name: legacy
+spec:
+  forProvider:
+    dialectUri: urn:example:legacy-claims
+---
+apiVersion: claim.wso2is.crossplane.io/v1alpha1
+kind: ExternalClaim
+metadata:
+  name: legacy-mail
+spec:
+  forProvider:
+    dialectUriRef:
+      name: legacy
+    claimUri: mail
+    mappedLocalClaimUri: http://wso2.org/claims/emailaddress

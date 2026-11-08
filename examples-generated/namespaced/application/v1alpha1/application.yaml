@@ -1,0 +1,50 @@
+apiVersion: application.wso2is.m.crossplane.io/v1alpha1
+kind: Application
+metadata:
+  annotations:
+    meta.upbound.io/example-id: application/v1alpha1/application
+  labels:
+    testing.upbound.io/example-name: portal
+  name: portal
+  namespace: default
+spec:
+  forProvider:
+    accessUrl: https://portal.example.com
+    advancedConfiguration:
+      skipLoginConsent: true
+    authenticationSequence:
+      steps:
+      - options:
+        - authenticator: BasicAuthenticator
+          idp: LOCAL
+      - options:
+        - authenticator: totp
+          idp: LOCAL
+        - authenticator: email-otp-authenticator
+          idp: LOCAL
+    claimConfiguration:
+      requestedClaims:
+      - mandatory: true
+        uri: http://wso2.org/claims/emailaddress
+      - uri: http://wso2.org/claims/givenname
+    description: Self-service portal
+    name: Customer Portal
+    oidc:
+      accessToken:
+        type: JWT
+        userAccessTokenExpiryInSeconds: 900
+      allowedOrigins:
+      - https://portal.example.com
+      callbackUrls:
+      - https://portal.example.com/callback
+      grantTypes:
+      - authorization_code
+      - refresh_token
+      logout:
+        backChannelLogoutUrl: https://portal.example.com/logout/backchannel
+      pkce:
+        mandatory: true
+      refreshToken:
+        expiryInSeconds: 86400
+        renewRefreshToken: true
+    templateId: oidc-web-application

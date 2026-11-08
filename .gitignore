@@ -1,0 +1,18 @@
+# Secrets and local settings
+.env
+.secrets/
+*.kubeconfig
+kubeconfig*.yaml
+
+# Scratch space for experiments
+_debug/
+
+# Build output (Upjet template)
+/.cache
+/.work
+/_output
+/results
+/bin
+cover.out
+.DS_Store
+.idea/

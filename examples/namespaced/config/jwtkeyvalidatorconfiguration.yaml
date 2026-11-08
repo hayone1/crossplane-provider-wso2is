@@ -1,0 +1,10 @@
+# How the server checks JWTs that clients use as client assertions. When you delete the
+# managed resource, the setting keeps its current value.
+apiVersion: config.wso2is.m.crossplane.io/v1alpha1
+kind: JWTKeyValidatorConfiguration
+metadata:
+  namespace: default
+  name: jwt-key-validator
+spec:
+  forProvider:
+    enableTokenReuse: true

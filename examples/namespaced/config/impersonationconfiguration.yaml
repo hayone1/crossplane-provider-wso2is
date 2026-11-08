@@ -1,0 +1,10 @@
+# Sends users an email when an administrator impersonates them. When you delete the
+# managed resource, the provider restores the server default.
+apiVersion: config.wso2is.m.crossplane.io/v1alpha1
+kind: ImpersonationConfiguration
+metadata:
+  namespace: default
+  name: impersonation
+spec:
+  forProvider:
+    enableEmailNotification: true

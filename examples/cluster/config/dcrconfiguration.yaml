@@ -1,0 +1,10 @@
+# OAuth2 dynamic client registration. When you delete the managed resource, the settings
+# keep their current values.
+apiVersion: config.wso2is.crossplane.io/v1alpha1
+kind: DCRConfiguration
+metadata:
+  name: dcr
+spec:
+  forProvider:
+    authenticationRequired: true
+    mandateSsa: false

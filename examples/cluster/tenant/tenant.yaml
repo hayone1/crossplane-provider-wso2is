@@ -1,0 +1,27 @@
+# A new tenant and its owner. Create tenants with a ProviderConfig that uses basic
+# authentication in the super tenant. To manage objects inside the tenant, create another
+# ProviderConfig with tenantDomain acme.example and the owner's credentials. The owner
+# signs in as owner@acme.example.
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: crossplane-system
+  name: acme-owner-password
+stringData:
+  password: Change-Me-Passw0rd!
+---
+apiVersion: tenant.wso2is.crossplane.io/v1alpha1
+kind: Tenant
+metadata:
+  name: acme
+spec:
+  forProvider:
+    domain: acme.example
+    ownerUsername: owner
+    ownerEmail: it@acme.example
+    ownerFirstName: Acme
+    ownerLastName: Admin
+    ownerPasswordSecretRef:
+      namespace: crossplane-system
+      name: acme-owner-password
+      key: password

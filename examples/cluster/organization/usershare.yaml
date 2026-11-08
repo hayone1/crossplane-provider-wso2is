@@ -1,0 +1,42 @@
+# Gives a user of the root organization access to an organization, without roles there.
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: crossplane-system
+  name: carol-password
+stringData:
+  password: Change-Me-Passw0rd!
+---
+apiVersion: organization.wso2is.crossplane.io/v1alpha1
+kind: UserShare
+metadata:
+  name: support-carol
+spec:
+  forProvider:
+    userIdRef:
+      name: carol
+    organizations:
+      - organizationIdRef:
+          name: share-partner
+        includeChildren: true
+---
+apiVersion: identity.wso2is.crossplane.io/v1alpha1
+kind: User
+metadata:
+  name: carol
+spec:
+  forProvider:
+    username: carol
+    email: carol@example.com
+    passwordSecretRef:
+      namespace: crossplane-system
+      name: carol-password
+      key: password
+---
+apiVersion: organization.wso2is.crossplane.io/v1alpha1
+kind: Organization
+metadata:
+  name: share-partner
+spec:
+  forProvider:
+    name: Share Partner Inc

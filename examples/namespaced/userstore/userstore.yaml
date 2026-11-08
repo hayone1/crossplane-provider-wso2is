@@ -1,0 +1,27 @@
+# A secondary JDBC user store. This example uses an embedded H2 database, so that it works
+# on any server. For real use, point url, driverName and userName at your database, for
+# example jdbc:postgresql://db.example.com:5432/customers with org.postgresql.Driver.
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: default
+  name: customers-userstore
+stringData:
+  password: wso2carbon
+---
+apiVersion: userstore.wso2is.m.crossplane.io/v1alpha1
+kind: UserStore
+metadata:
+  namespace: default
+  name: customers
+spec:
+  forProvider:
+    name: CUSTOMERS
+    type: UniqueIDJDBCUserStoreManager
+    description: Customer accounts
+    properties:
+      url: jdbc:h2:./repository/database/CUSTOMERS_USERSTORE;DB_CLOSE_ON_EXIT=FALSE
+      driverName: org.h2.Driver
+      userName: wso2carbon
+    secretPropertiesSecretRef:
+      name: customers-userstore

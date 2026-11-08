@@ -1,0 +1,43 @@
+apiVersion: userstore.wso2is.m.crossplane.io/v1alpha1
+kind: UserStore
+metadata:
+  annotations:
+    meta.upbound.io/example-id: userstore/v1alpha1/userstore
+  labels:
+    testing.upbound.io/example-name: customers
+  name: customers
+  namespace: default
+spec:
+  forProvider:
+    description: Customer accounts
+    name: CUSTOMERS
+    properties:
+      driverName: org.postgresql.Driver
+      url: jdbc:postgresql://db.example.com:5432/customers
+      userName: wso2
+    secretPropertiesSecretRef:
+      key: example-key
+      name: example-secret
+    type: UniqueIDJDBCUserStoreManager
+
+---
+
+apiVersion: identity.wso2is.m.crossplane.io/v1alpha1
+kind: User
+metadata:
+  annotations:
+    meta.upbound.io/example-id: userstore/v1alpha1/userstore
+  labels:
+    testing.upbound.io/example-name: customer
+  name: customer
+  namespace: default
+spec:
+  forProvider:
+    email: jane@example.com
+    passwordSecretRef:
+      key: example-key
+      name: example-secret
+    userStoreSelector:
+      matchLabels:
+        testing.upbound.io/example-name: customers
+    username: jane

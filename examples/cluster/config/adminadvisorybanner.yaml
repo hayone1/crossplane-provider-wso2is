@@ -1,0 +1,10 @@
+# The advisory banner on the Console sign-in page. Set enabled to true to show it. When you
+# delete the managed resource, the banner keeps its current settings.
+apiVersion: config.wso2is.crossplane.io/v1alpha1
+kind: AdminAdvisoryBanner
+metadata:
+  name: banner
+spec:
+  forProvider:
+    enabled: false
+    content: Warning - unauthorized use of this tool is strictly prohibited. All activities performed using this tool are logged and monitored.

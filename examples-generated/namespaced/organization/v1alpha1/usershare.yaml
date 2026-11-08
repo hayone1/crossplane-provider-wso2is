@@ -1,0 +1,117 @@
+apiVersion: organization.wso2is.m.crossplane.io/v1alpha1
+kind: UserShare
+metadata:
+  annotations:
+    meta.upbound.io/example-id: organization/v1alpha1/usershare
+  labels:
+    testing.upbound.io/example-name: support
+  name: support
+  namespace: default
+spec:
+  forProvider:
+    organizations:
+    - includeChildren: true
+      organizationIdSelector:
+        matchLabels:
+          testing.upbound.io/example-name: partner
+      roles:
+      - audienceName: Customer Portal
+        audienceType: application
+        name: order-admins
+    userIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: support
+
+---
+
+apiVersion: application.wso2is.m.crossplane.io/v1alpha1
+kind: Application
+metadata:
+  annotations:
+    meta.upbound.io/example-id: organization/v1alpha1/usershare
+  labels:
+    testing.upbound.io/example-name: portal
+  name: portal
+  namespace: default
+spec:
+  forProvider:
+    associatedRoles:
+      allowedAudience: APPLICATION
+    name: Partner Portal
+    oidc:
+      callbackUrls:
+      - https://portal.example.com/callback
+      grantTypes:
+      - authorization_code
+
+---
+
+apiVersion: application.wso2is.m.crossplane.io/v1alpha1
+kind: ApplicationShare
+metadata:
+  annotations:
+    meta.upbound.io/example-id: organization/v1alpha1/usershare
+  labels:
+    testing.upbound.io/example-name: portal
+  name: portal
+  namespace: default
+spec:
+  forProvider:
+    applicationIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: portal
+    organizationIdsRefs:
+    - name: partner
+
+---
+
+apiVersion: organization.wso2is.m.crossplane.io/v1alpha1
+kind: Organization
+metadata:
+  annotations:
+    meta.upbound.io/example-id: organization/v1alpha1/usershare
+  labels:
+    testing.upbound.io/example-name: partner
+  name: partner
+  namespace: default
+spec:
+  forProvider:
+    name: Partner Inc
+
+---
+
+apiVersion: identity.wso2is.m.crossplane.io/v1alpha1
+kind: Role
+metadata:
+  annotations:
+    meta.upbound.io/example-id: organization/v1alpha1/usershare
+  labels:
+    testing.upbound.io/example-name: support_agent
+  name: support-agent
+  namespace: default
+spec:
+  forProvider:
+    audienceIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: portal
+    audienceType: application
+    name: support-agent
+
+---
+
+apiVersion: identity.wso2is.m.crossplane.io/v1alpha1
+kind: User
+metadata:
+  annotations:
+    meta.upbound.io/example-id: organization/v1alpha1/usershare
+  labels:
+    testing.upbound.io/example-name: support
+  name: support
+  namespace: default
+spec:
+  forProvider:
+    email: sam@example.com
+    passwordSecretRef:
+      key: example-key
+      name: example-secret
+    username: sam

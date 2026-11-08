@@ -1,0 +1,690 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.23.0
+  name: claims.claim.wso2is.crossplane.io
+spec:
+  group: claim.wso2is.crossplane.io
+  names:
+    categories:
+    - crossplane
+    - managed
+    - wso2is
+    kind: Claim
+    listKind: ClaimList
+    plural: claims
+    singular: claim
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.conditions[?(@.type=='Synced')].status
+      name: SYNCED
+      type: string
+    - jsonPath: .status.conditions[?(@.type=='Ready')].status
+      name: READY
+      type: string
+    - jsonPath: .metadata.annotations.crossplane\.io/external-name
+      name: EXTERNAL-NAME
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: AGE
+      type: date
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Claim is the Schema for the Claims API. Manages a local claim.
+          A local claim is a user attribute in the http://wso2.org/claims dialect.
+          The resource also sets where each user store keeps the attribute. Applications
+          do not see local claims directly. To send the attribute to applications,
+          map it in the OIDC dialect with ExternalClaim (dialect_uri = "http://wso2.org/oidc/claim"),
+          and add it to an OIDC scope with OIDCScope. To show it in the SCIM APIs,
+          map it in a SCIM dialect too. To manage an existing object, set the crossplane.io/external-name
+          annotation to its ID, which is the base64url encoding of the claim URI,
+          without padding.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ClaimSpec defines the desired state of Claim
+            properties:
+              deletionPolicy:
+                default: Delete
+                description: |-
+                  DeletionPolicy specifies what will happen to the underlying external
+                  when this managed resource is deleted - either "Delete" or "Orphan" the
+                  external resource.
+                  This field is planned to be deprecated in favor of the ManagementPolicies
+                  field in a future release. Currently, both could be set independently and
+                  non-default values would be honored if the feature flag is enabled.
+                  See the design doc for more information: https://github.com/crossplane/crossplane/blob/499895a25d1a1a0ba1604944ef98ac7a1a71f197/design/design-doc-observe-only-resources.md?plain=1#L223
+                enum:
+                - Orphan
+                - Delete
+                type: string
+              forProvider:
+                properties:
+                  attributeMappings:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      (Map of String) User store attribute (column or LDAP attribute) by user store domain, for example { PRIMARY = "employeeId" }.
+                      User store attribute (column or LDAP attribute) by user store domain, for example `{ PRIMARY = "employeeId" }`.
+                    type: object
+                    x-kubernetes-map-type: granular
+                  canonicalValues:
+                    description: down). (see below for nested schema)
+                    items:
+                      properties:
+                        label:
+                          description: |-
+                            (String) Display label.
+                            Display label.
+                          type: string
+                        value:
+                          description: |-
+                            (String) Stored value.
+                            Stored value.
+                          type: string
+                      type: object
+                    type: array
+                  claimUri:
+                    description: |-
+                      (String) Claim URI, for example http://wso2.org/claims/employeeId. Changing it replaces the claim.
+                      Claim URI, for example `http://wso2.org/claims/employeeId`. Changing it replaces the claim.
+                    type: string
+                  dataType:
+                    description: |-
+                      (String) string, boolean, integer, decimal, date_time or complex. The default is string.
+                      `string`, `boolean`, `integer`, `decimal`, `date_time` or `complex`. The default is `string`.
+                    type: string
+                  description:
+                    description: |-
+                      (String) Description.
+                      Description.
+                    type: string
+                  displayName:
+                    description: |-
+                      (String) Name shown in forms and the Console.
+                      Name shown in forms and the Console.
+                    type: string
+                  displayOrder:
+                    description: |-
+                      (Number) Position of the attribute in profile and registration forms. The default is 0.
+                      Position of the attribute in profile and registration forms. The default is `0`.
+                    type: number
+                  excludedUserStores:
+                    description: |-
+                      (Set of String) User stores where the attribute is not available.
+                      User stores where the attribute is not available.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  inputType:
+                    description: |-
+                      (String) Input control used in forms, for example text_input, dropdown, checkbox_group, radio_group, date_picker, toggle.
+                      Input control used in forms, for example `text_input`, `dropdown`, `checkbox_group`, `radio_group`, `date_picker`, `toggle`.
+                    type: string
+                  managedInUserStore:
+                    description: |-
+                      (Boolean) Whether the value is stored in the user store (otherwise in the identity database).
+                      Whether the value is stored in the user store (otherwise in the identity database).
+                    type: boolean
+                  multiValued:
+                    description: |-
+                      (Boolean) The attribute holds several values. The default is false.
+                      The attribute holds several values. The default is `false`.
+                    type: boolean
+                  profiles:
+                    additionalProperties:
+                      properties:
+                        readOnly:
+                          description: |-
+                            (Boolean) Users cannot change the value. The default is false.
+                            Users cannot change the value in this profile.
+                          type: boolean
+                        required:
+                          description: |-
+                            (Boolean) A value is mandatory in profiles. The default is false.
+                            Required in this profile.
+                          type: boolean
+                        supportedByDefault:
+                          description: |-
+                            (Boolean) Shown in user profiles (and self registration) by default. The default is false.
+                            Shown in this profile.
+                          type: boolean
+                      type: object
+                    description: 'profile overrides (WSO2 IS 7.1+), keyed by profile:
+                      console, endUser, selfRegistration. (see below for nested schema)'
+                    type: object
+                  properties:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      (Map of String) Additional claim properties. Only the keys listed here are managed.
+                      Additional claim properties. Only the keys listed here are managed.
+                    type: object
+                    x-kubernetes-map-type: granular
+                  readOnly:
+                    description: |-
+                      (Boolean) Users cannot change the value. The default is false.
+                      Users cannot change the value. The default is `false`.
+                    type: boolean
+                  regex:
+                    description: |-
+                      (String) Regular expression values must match.
+                      Regular expression values must match.
+                    type: string
+                  required:
+                    description: |-
+                      (Boolean) A value is mandatory in profiles. The default is false.
+                      A value is mandatory in profiles. The default is `false`.
+                    type: boolean
+                  sharedProfileValueResolvingMethod:
+                    description: |-
+                      organizations: FromOrigin, FromSharedProfile or FromFirstFoundInHierarchy.
+                      How the value is resolved for users shared with sub-organizations: `FromOrigin`, `FromSharedProfile` or `FromFirstFoundInHierarchy`.
+                    type: string
+                  subAttributes:
+                    description: |-
+                      attribute claim URIs of a complex attribute.
+                      Sub-attribute claim URIs of a `complex` attribute.
+                    items:
+                      type: string
+                    type: array
+                  supportedByDefault:
+                    description: |-
+                      (Boolean) Shown in user profiles (and self registration) by default. The default is false.
+                      Shown in user profiles (and self registration) by default. The default is `false`.
+                    type: boolean
+                  uniquenessScope:
+                    description: |-
+                      (String) Uniqueness validation: NONE, WITHIN_USERSTORE or ACROSS_USERSTORES.
+                      Uniqueness validation: `NONE`, `WITHIN_USERSTORE` or `ACROSS_USERSTORES`.
+                    type: string
+                type: object
+              initProvider:
+                description: |-
+                  THIS IS A BETA FIELD. It will be honored
+                  unless the Management Policies feature flag is disabled.
+                  InitProvider holds the same fields as ForProvider, with the exception
+                  of Identifier and other resource reference fields. The fields that are
+                  in InitProvider are merged into ForProvider when the resource is created.
+                  The same fields are also added to the terraform ignore_changes hook, to
+                  avoid updating them after creation. This is useful for fields that are
+                  required on creation, but we do not desire to update them after creation,
+                  for example because of an external controller is managing them, like an
+                  autoscaler.
+                properties:
+                  attributeMappings:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      (Map of String) User store attribute (column or LDAP attribute) by user store domain, for example { PRIMARY = "employeeId" }.
+                      User store attribute (column or LDAP attribute) by user store domain, for example `{ PRIMARY = "employeeId" }`.
+                    type: object
+                    x-kubernetes-map-type: granular
+                  canonicalValues:
+                    description: down). (see below for nested schema)
+                    items:
+                      properties:
+                        label:
+                          description: |-
+                            (String) Display label.
+                            Display label.
+                          type: string
+                        value:
+                          description: |-
+                            (String) Stored value.
+                            Stored value.
+                          type: string
+                      type: object
+                    type: array
+                  claimUri:
+                    description: |-
+                      (String) Claim URI, for example http://wso2.org/claims/employeeId. Changing it replaces the claim.
+                      Claim URI, for example `http://wso2.org/claims/employeeId`. Changing it replaces the claim.
+                    type: string
+                  dataType:
+                    description: |-
+                      (String) string, boolean, integer, decimal, date_time or complex. The default is string.
+                      `string`, `boolean`, `integer`, `decimal`, `date_time` or `complex`. The default is `string`.
+                    type: string
+                  description:
+                    description: |-
+                      (String) Description.
+                      Description.
+                    type: string
+                  displayName:
+                    description: |-
+                      (String) Name shown in forms and the Console.
+                      Name shown in forms and the Console.
+                    type: string
+                  displayOrder:
+                    description: |-
+                      (Number) Position of the attribute in profile and registration forms. The default is 0.
+                      Position of the attribute in profile and registration forms. The default is `0`.
+                    type: number
+                  excludedUserStores:
+                    description: |-
+                      (Set of String) User stores where the attribute is not available.
+                      User stores where the attribute is not available.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  inputType:
+                    description: |-
+                      (String) Input control used in forms, for example text_input, dropdown, checkbox_group, radio_group, date_picker, toggle.
+                      Input control used in forms, for example `text_input`, `dropdown`, `checkbox_group`, `radio_group`, `date_picker`, `toggle`.
+                    type: string
+                  managedInUserStore:
+                    description: |-
+                      (Boolean) Whether the value is stored in the user store (otherwise in the identity database).
+                      Whether the value is stored in the user store (otherwise in the identity database).
+                    type: boolean
+                  multiValued:
+                    description: |-
+                      (Boolean) The attribute holds several values. The default is false.
+                      The attribute holds several values. The default is `false`.
+                    type: boolean
+                  profiles:
+                    additionalProperties:
+                      properties:
+                        readOnly:
+                          description: |-
+                            (Boolean) Users cannot change the value. The default is false.
+                            Users cannot change the value in this profile.
+                          type: boolean
+                        required:
+                          description: |-
+                            (Boolean) A value is mandatory in profiles. The default is false.
+                            Required in this profile.
+                          type: boolean
+                        supportedByDefault:
+                          description: |-
+                            (Boolean) Shown in user profiles (and self registration) by default. The default is false.
+                            Shown in this profile.
+                          type: boolean
+                      type: object
+                    description: 'profile overrides (WSO2 IS 7.1+), keyed by profile:
+                      console, endUser, selfRegistration. (see below for nested schema)'
+                    type: object
+                  properties:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      (Map of String) Additional claim properties. Only the keys listed here are managed.
+                      Additional claim properties. Only the keys listed here are managed.
+                    type: object
+                    x-kubernetes-map-type: granular
+                  readOnly:
+                    description: |-
+                      (Boolean) Users cannot change the value. The default is false.
+                      Users cannot change the value. The default is `false`.
+                    type: boolean
+                  regex:
+                    description: |-
+                      (String) Regular expression values must match.
+                      Regular expression values must match.
+                    type: string
+                  required:
+                    description: |-
+                      (Boolean) A value is mandatory in profiles. The default is false.
+                      A value is mandatory in profiles. The default is `false`.
+                    type: boolean
+                  sharedProfileValueResolvingMethod:
+                    description: |-
+                      organizations: FromOrigin, FromSharedProfile or FromFirstFoundInHierarchy.
+                      How the value is resolved for users shared with sub-organizations: `FromOrigin`, `FromSharedProfile` or `FromFirstFoundInHierarchy`.
+                    type: string
+                  subAttributes:
+                    description: |-
+                      attribute claim URIs of a complex attribute.
+                      Sub-attribute claim URIs of a `complex` attribute.
+                    items:
+                      type: string
+                    type: array
+                  supportedByDefault:
+                    description: |-
+                      (Boolean) Shown in user profiles (and self registration) by default. The default is false.
+                      Shown in user profiles (and self registration) by default. The default is `false`.
+                    type: boolean
+                  uniquenessScope:
+                    description: |-
+                      (String) Uniqueness validation: NONE, WITHIN_USERSTORE or ACROSS_USERSTORES.
+                      Uniqueness validation: `NONE`, `WITHIN_USERSTORE` or `ACROSS_USERSTORES`.
+                    type: string
+                type: object
+              managementPolicies:
+                default:
+                - '*'
+                description: |-
+                  THIS IS A BETA FIELD. It is on by default but can be opted out
+                  through a Crossplane feature flag.
+                  ManagementPolicies specify the array of actions Crossplane is allowed to
+                  take on the managed and external resources.
+                  This field is planned to replace the DeletionPolicy field in a future
+                  release. Currently, both could be set independently and non-default
+                  values would be honored if the feature flag is enabled. If both are
+                  custom, the DeletionPolicy field will be ignored.
+                  See the design doc for more information: https://github.com/crossplane/crossplane/blob/499895a25d1a1a0ba1604944ef98ac7a1a71f197/design/design-doc-observe-only-resources.md?plain=1#L223
+                  and this one: https://github.com/crossplane/crossplane/blob/444267e84783136daa93568b364a5f01228cacbe/design/one-pager-ignore-changes.md
+                items:
+                  description: |-
+                    A ManagementAction represents an action that the Crossplane controllers
+                    can take on an external resource.
+                  enum:
+                  - Observe
+                  - Create
+                  - Update
+                  - Delete
+                  - LateInitialize
+                  - '*'
+                  type: string
+                type: array
+              providerConfigRef:
+                default:
+                  name: default
+                description: |-
+                  ProviderConfigReference specifies how the provider that will be used to
+                  create, observe, update, and delete this managed resource should be
+                  configured.
+                properties:
+                  name:
+                    description: Name of the referenced object.
+                    type: string
+                  policy:
+                    description: Policies for referencing.
+                    properties:
+                      resolution:
+                        default: Required
+                        description: |-
+                          Resolution specifies whether resolution of this reference is required.
+                          The default is 'Required', which means the reconcile will fail if the
+                          reference cannot be resolved. 'Optional' means this reference will be
+                          a no-op if it cannot be resolved.
+                        enum:
+                        - Required
+                        - Optional
+                        type: string
+                      resolve:
+                        description: |-
+                          Resolve specifies when this reference should be resolved. The default
+                          is 'IfNotPresent', which will attempt to resolve the reference only when
+                          the corresponding field is not present. Use 'Always' to resolve the
+                          reference on every reconcile.
+                        enum:
+                        - Always
+                        - IfNotPresent
+                        type: string
+                    type: object
+                required:
+                - name
+                type: object
+              writeConnectionSecretToRef:
+                description: |-
+                  WriteConnectionSecretToReference specifies the namespace and name of a
+                  Secret to which any connection details for this managed resource should
+                  be written. Connection details frequently include the endpoint, username,
+                  and password required to connect to the managed resource.
+                properties:
+                  name:
+                    description: Name of the secret.
+                    type: string
+                  namespace:
+                    description: Namespace of the secret.
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+            required:
+            - forProvider
+            type: object
+            x-kubernetes-validations:
+            - message: spec.forProvider.attributeMappings is a required parameter
+              rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.attributeMappings)
+                || (has(self.initProvider) && has(self.initProvider.attributeMappings))'
+            - message: spec.forProvider.claimUri is a required parameter
+              rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.claimUri)
+                || (has(self.initProvider) && has(self.initProvider.claimUri))'
+            - message: spec.forProvider.displayName is a required parameter
+              rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.displayName)
+                || (has(self.initProvider) && has(self.initProvider.displayName))'
+          status:
+            description: ClaimStatus defines the observed state of Claim.
+            properties:
+              atProvider:
+                properties:
+                  attributeMappings:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      (Map of String) User store attribute (column or LDAP attribute) by user store domain, for example { PRIMARY = "employeeId" }.
+                      User store attribute (column or LDAP attribute) by user store domain, for example `{ PRIMARY = "employeeId" }`.
+                    type: object
+                    x-kubernetes-map-type: granular
+                  canonicalValues:
+                    description: down). (see below for nested schema)
+                    items:
+                      properties:
+                        label:
+                          description: |-
+                            (String) Display label.
+                            Display label.
+                          type: string
+                        value:
+                          description: |-
+                            (String) Stored value.
+                            Stored value.
+                          type: string
+                      type: object
+                    type: array
+                  claimUri:
+                    description: |-
+                      (String) Claim URI, for example http://wso2.org/claims/employeeId. Changing it replaces the claim.
+                      Claim URI, for example `http://wso2.org/claims/employeeId`. Changing it replaces the claim.
+                    type: string
+                  dataType:
+                    description: |-
+                      (String) string, boolean, integer, decimal, date_time or complex. The default is string.
+                      `string`, `boolean`, `integer`, `decimal`, `date_time` or `complex`. The default is `string`.
+                    type: string
+                  description:
+                    description: |-
+                      (String) Description.
+                      Description.
+                    type: string
+                  displayName:
+                    description: |-
+                      (String) Name shown in forms and the Console.
+                      Name shown in forms and the Console.
+                    type: string
+                  displayOrder:
+                    description: |-
+                      (Number) Position of the attribute in profile and registration forms. The default is 0.
+                      Position of the attribute in profile and registration forms. The default is `0`.
+                    type: number
+                  excludedUserStores:
+                    description: |-
+                      (Set of String) User stores where the attribute is not available.
+                      User stores where the attribute is not available.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  id:
+                    description: (String) Claim ID (base64url of the claim URI).
+                    type: string
+                  inputType:
+                    description: |-
+                      (String) Input control used in forms, for example text_input, dropdown, checkbox_group, radio_group, date_picker, toggle.
+                      Input control used in forms, for example `text_input`, `dropdown`, `checkbox_group`, `radio_group`, `date_picker`, `toggle`.
+                    type: string
+                  managedInUserStore:
+                    description: |-
+                      (Boolean) Whether the value is stored in the user store (otherwise in the identity database).
+                      Whether the value is stored in the user store (otherwise in the identity database).
+                    type: boolean
+                  multiValued:
+                    description: |-
+                      (Boolean) The attribute holds several values. The default is false.
+                      The attribute holds several values. The default is `false`.
+                    type: boolean
+                  profiles:
+                    additionalProperties:
+                      properties:
+                        readOnly:
+                          description: |-
+                            (Boolean) Users cannot change the value. The default is false.
+                            Users cannot change the value in this profile.
+                          type: boolean
+                        required:
+                          description: |-
+                            (Boolean) A value is mandatory in profiles. The default is false.
+                            Required in this profile.
+                          type: boolean
+                        supportedByDefault:
+                          description: |-
+                            (Boolean) Shown in user profiles (and self registration) by default. The default is false.
+                            Shown in this profile.
+                          type: boolean
+                      type: object
+                    description: 'profile overrides (WSO2 IS 7.1+), keyed by profile:
+                      console, endUser, selfRegistration. (see below for nested schema)'
+                    type: object
+                  properties:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      (Map of String) Additional claim properties. Only the keys listed here are managed.
+                      Additional claim properties. Only the keys listed here are managed.
+                    type: object
+                    x-kubernetes-map-type: granular
+                  readOnly:
+                    description: |-
+                      (Boolean) Users cannot change the value. The default is false.
+                      Users cannot change the value. The default is `false`.
+                    type: boolean
+                  regex:
+                    description: |-
+                      (String) Regular expression values must match.
+                      Regular expression values must match.
+                    type: string
+                  required:
+                    description: |-
+                      (Boolean) A value is mandatory in profiles. The default is false.
+                      A value is mandatory in profiles. The default is `false`.
+                    type: boolean
+                  sharedProfileValueResolvingMethod:
+                    description: |-
+                      organizations: FromOrigin, FromSharedProfile or FromFirstFoundInHierarchy.
+                      How the value is resolved for users shared with sub-organizations: `FromOrigin`, `FromSharedProfile` or `FromFirstFoundInHierarchy`.
+                    type: string
+                  subAttributes:
+                    description: |-
+                      attribute claim URIs of a complex attribute.
+                      Sub-attribute claim URIs of a `complex` attribute.
+                    items:
+                      type: string
+                    type: array
+                  supportedByDefault:
+                    description: |-
+                      (Boolean) Shown in user profiles (and self registration) by default. The default is false.
+                      Shown in user profiles (and self registration) by default. The default is `false`.
+                    type: boolean
+                  uniquenessScope:
+                    description: |-
+                      (String) Uniqueness validation: NONE, WITHIN_USERSTORE or ACROSS_USERSTORES.
+                      Uniqueness validation: `NONE`, `WITHIN_USERSTORE` or `ACROSS_USERSTORES`.
+                    type: string
+                type: object
+              conditions:
+                description: Conditions of the resource.
+                items:
+                  description: A Condition that may apply to a resource.
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        LastTransitionTime is the last time this condition transitioned from one
+                        status to another.
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        A Message containing details about this condition's last transition from
+                        one status to another, if any.
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        ObservedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      type: integer
+                    reason:
+                      description: A Reason for this condition's last transition from
+                        one status to another.
+                      type: string
+                    status:
+                      description: Status of this condition; is it currently True,
+                        False, or Unknown?
+                      type: string
+                    type:
+                      description: |-
+                        Type of this condition. At most one of each condition type may apply to
+                        a resource at any point in time.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              lastHandledReconcileAt:
+                description: |-
+                  LastHandledReconcileAt holds the value of the most recent
+                  reconcile-requested-at annotation token that the controller has
+                  processed. Users can compare this to the annotation to determine
+                  whether a reconcile request has been handled.
+                type: string
+              observedGeneration:
+                description: |-
+                  ObservedGeneration is the latest metadata.generation
+                  which resulted in either a ready state, or stalled due to error
+                  it can not recover from without human intervention.
+                format: int64
+                type: integer
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

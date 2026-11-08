@@ -1,0 +1,16 @@
+apiVersion: notification.wso2is.m.crossplane.io/v1alpha1
+kind: NotificationTemplate
+metadata:
+  annotations:
+    meta.upbound.io/example-id: notification/v1alpha1/notificationtemplate
+  labels:
+    testing.upbound.io/example-name: account_confirmation_fr
+  name: account-confirmation-fr
+  namespace: default
+spec:
+  forProvider:
+    body: '<p>Bonjour {{user-name}}, confirmez votre compte : <a href="{{carbon.product-url}}/accountrecoveryendpoint/confirmregistration.do?confirmation={{confirmation-code}}">confirmer</a></p>'
+    channel: email
+    locale: fr_FR
+    subject: Confirmez votre compte
+    type: AccountConfirmation

@@ -1,0 +1,10 @@
+# A group in the primary user store. Group names are 3 to 30 characters long and have no
+# spaces.
+apiVersion: identity.wso2is.m.crossplane.io/v1alpha1
+kind: Group
+metadata:
+  namespace: default
+  name: developers
+spec:
+  forProvider:
+    name: developers

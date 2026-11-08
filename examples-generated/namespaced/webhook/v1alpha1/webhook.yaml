@@ -1,0 +1,19 @@
+apiVersion: webhook.wso2is.m.crossplane.io/v1alpha1
+kind: Webhook
+metadata:
+  annotations:
+    meta.upbound.io/example-id: webhook/v1alpha1/webhook
+  labels:
+    testing.upbound.io/example-name: audit
+  name: audit
+  namespace: default
+spec:
+  forProvider:
+    channels:
+    - https://schemas.identity.wso2.org/events/login
+    - https://schemas.identity.wso2.org/events/user
+    endpoint: https://hooks.example.com/wso2is
+    name: Audit events
+    secretSecretRef:
+      key: example-key
+      name: example-secret

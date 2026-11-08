@@ -1,0 +1,18 @@
+apiVersion: config.wso2is.crossplane.io/v1alpha1
+kind: RemoteLogging
+metadata:
+  annotations:
+    meta.upbound.io/example-id: config/v1alpha1/remotelogging
+  labels:
+    testing.upbound.io/example-name: audit
+  name: audit
+spec:
+  forProvider:
+    connectTimeoutMillis: "5000"
+    logType: AUDIT
+    passwordSecretRef:
+      key: example-key
+      name: example-secret
+      namespace: upbound-system
+    remoteUrl: https://logs.example.com/wso2is/audit
+    username: wso2is

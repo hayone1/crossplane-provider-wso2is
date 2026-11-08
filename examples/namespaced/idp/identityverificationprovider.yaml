@@ -1,0 +1,27 @@
+# Identity verification with Onfido. The API tokens come from a Secret.
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: default
+  name: onfido-tokens
+stringData:
+  token: replace-with-your-api-token
+  webhook_token: replace-with-your-webhook-token
+---
+apiVersion: idp.wso2is.m.crossplane.io/v1alpha1
+kind: IdentityVerificationProvider
+metadata:
+  namespace: default
+  name: onfido
+spec:
+  forProvider:
+    name: Onfido
+    type: ONFIDO
+    properties:
+      base_url: https://api.eu.onfido.com/v3.6
+      workflow_id: replace-with-your-workflow-id
+    secretPropertiesSecretRef:
+      name: onfido-tokens
+    claimMappings:
+      http://wso2.org/claims/givenname: first_name
+      http://wso2.org/claims/lastname: last_name

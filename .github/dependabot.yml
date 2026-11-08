@@ -1,0 +1,32 @@
+version: 2
+updates:
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: fix(deps)
+    # The Terraform plugin libraries must stay compatible with both Upjet and
+    # terraform-provider-wso2is. They move when one of those two modules
+    # moves.
+    ignore:
+      - dependency-name: github.com/hashicorp/terraform-plugin-sdk/v2
+      - dependency-name: github.com/hashicorp/terraform-plugin-go
+      - dependency-name: github.com/hashicorp/terraform-plugin-framework
+    groups:
+      # Bumped together with TERRAFORM_PROVIDER_VERSION and `make generate`.
+      terraform-provider:
+        patterns: [github.com/hayone1/terraform-provider-wso2is]
+      go:
+        patterns: ['*']
+        exclude-patterns: [github.com/hayone1/terraform-provider-wso2is]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci
+    groups:
+      actions:
+        patterns: ['*']

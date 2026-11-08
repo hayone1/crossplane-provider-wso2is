@@ -1,0 +1,19 @@
+apiVersion: notification.wso2is.crossplane.io/v1alpha1
+kind: SMSSender
+metadata:
+  annotations:
+    meta.upbound.io/example-id: notification/v1alpha1/smssender
+  labels:
+    testing.upbound.io/example-name: twilio
+  name: twilio
+spec:
+  forProvider:
+    contentType: FORM
+    key: ACxxxx
+    providerName: Twilio
+    providerUrl: https://api.twilio.com/2010-04-01/Accounts/ACxxxx/Messages.json
+    secretSecretRef:
+      key: example-key
+      name: example-secret
+      namespace: upbound-system
+    sender: "+15550000000"

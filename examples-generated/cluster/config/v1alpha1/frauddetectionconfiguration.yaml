@@ -1,0 +1,12 @@
+apiVersion: config.wso2is.crossplane.io/v1alpha1
+kind: FraudDetectionConfiguration
+metadata:
+  annotations:
+    meta.upbound.io/example-id: config/v1alpha1/frauddetectionconfiguration
+  labels:
+    testing.upbound.io/example-name: this
+  name: this
+spec:
+  forProvider:
+    logRequestPayload: false
+    publishUserInfo: true

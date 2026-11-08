@@ -1,0 +1,80 @@
+apiVersion: identity.wso2is.m.crossplane.io/v1alpha1
+kind: Role
+metadata:
+  annotations:
+    meta.upbound.io/example-id: identity/v1alpha1/role
+  labels:
+    testing.upbound.io/example-name: order_admins
+  name: order-admins
+  namespace: default
+spec:
+  forProvider:
+    name: order-admins
+    permissions:
+    - orders:read
+    - orders:write
+
+---
+
+apiVersion: application.wso2is.m.crossplane.io/v1alpha1
+kind: APIResource
+metadata:
+  annotations:
+    meta.upbound.io/example-id: identity/v1alpha1/role
+  labels:
+    testing.upbound.io/example-name: orders
+  name: orders
+  namespace: default
+spec:
+  forProvider:
+    identifier: https://api.example.com/orders
+    name: Orders API
+    scopes:
+    - displayName: Read orders
+      name: orders:read
+    - displayName: Change orders
+      name: orders:write
+
+---
+
+apiVersion: application.wso2is.m.crossplane.io/v1alpha1
+kind: Application
+metadata:
+  annotations:
+    meta.upbound.io/example-id: identity/v1alpha1/role
+  labels:
+    testing.upbound.io/example-name: orders_ui
+  name: orders-ui
+  namespace: default
+spec:
+  forProvider:
+    associatedRoles:
+      allowedAudience: APPLICATION
+    name: Orders UI
+    oidc:
+      callbackUrls:
+      - https://orders.example.com/callback
+      grantTypes:
+      - authorization_code
+
+---
+
+apiVersion: application.wso2is.m.crossplane.io/v1alpha1
+kind: AuthorizedAPI
+metadata:
+  annotations:
+    meta.upbound.io/example-id: identity/v1alpha1/role
+  labels:
+    testing.upbound.io/example-name: orders_ui
+  name: orders-ui
+  namespace: default
+spec:
+  forProvider:
+    apiResourceIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: orders
+    applicationIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: orders_ui
+    scopes:
+    - orders:read

@@ -1,0 +1,10 @@
+# SCIM inbound provisioning. Do not set provisioningUserstore unless you want every new
+# SCIM user in that user store. When you delete the managed resource, the provider
+# restores the server defaults.
+apiVersion: config.wso2is.crossplane.io/v1alpha1
+kind: InboundProvisioningConfiguration
+metadata:
+  name: inbound-provisioning
+spec:
+  forProvider:
+    proxyMode: false

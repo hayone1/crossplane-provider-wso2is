@@ -1,0 +1,50 @@
+apiVersion: identity.wso2is.m.crossplane.io/v1alpha1
+kind: GroupMembers
+metadata:
+  annotations:
+    meta.upbound.io/example-id: identity/v1alpha1/groupmembers
+  labels:
+    testing.upbound.io/example-name: developers
+  name: developers
+  namespace: default
+spec:
+  forProvider:
+    groupIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: developers
+    userIdsRefs:
+    - name: alice
+
+---
+
+apiVersion: identity.wso2is.m.crossplane.io/v1alpha1
+kind: Group
+metadata:
+  annotations:
+    meta.upbound.io/example-id: identity/v1alpha1/groupmembers
+  labels:
+    testing.upbound.io/example-name: developers
+  name: developers
+  namespace: default
+spec:
+  forProvider:
+    name: developers
+
+---
+
+apiVersion: identity.wso2is.m.crossplane.io/v1alpha1
+kind: User
+metadata:
+  annotations:
+    meta.upbound.io/example-id: identity/v1alpha1/groupmembers
+  labels:
+    testing.upbound.io/example-name: alice
+  name: alice
+  namespace: default
+spec:
+  forProvider:
+    email: alice@example.com
+    passwordSecretRef:
+      key: example-key
+      name: example-secret
+    username: alice

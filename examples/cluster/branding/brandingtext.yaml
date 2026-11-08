@@ -1,0 +1,12 @@
+# Custom text on the login screen, in English.
+apiVersion: branding.wso2is.crossplane.io/v1alpha1
+kind: BrandingText
+metadata:
+  name: login
+spec:
+  forProvider:
+    screen: login
+    locale: en-US
+    text:
+      login.heading: Sign in to Acme
+      login.button: Continue

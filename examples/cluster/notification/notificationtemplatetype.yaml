@@ -1,0 +1,20 @@
+# A custom notification type with an email template.
+apiVersion: notification.wso2is.crossplane.io/v1alpha1
+kind: NotificationTemplateType
+metadata:
+  name: contract-ready
+spec:
+  forProvider:
+    channel: email
+    name: ContractReady
+---
+apiVersion: notification.wso2is.crossplane.io/v1alpha1
+kind: NotificationTemplate
+metadata:
+  name: contract-ready
+spec:
+  forProvider:
+    channel: email
+    type: ContractReady
+    subject: Your contract is ready
+    body: <p>Hi {{user-name}}, your contract is ready to sign.</p>

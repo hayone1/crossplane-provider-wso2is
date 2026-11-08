@@ -1,0 +1,85 @@
+apiVersion: organization.wso2is.crossplane.io/v1alpha1
+kind: Organization
+metadata:
+  annotations:
+    meta.upbound.io/example-id: organization/v1alpha1/organization
+  labels:
+    testing.upbound.io/example-name: partner
+  name: partner
+spec:
+  forProvider:
+    attributes:
+      region: eu-west
+    description: Reseller
+    name: Partner Inc
+
+---
+
+apiVersion: application.wso2is.crossplane.io/v1alpha1
+kind: Application
+metadata:
+  annotations:
+    meta.upbound.io/example-id: organization/v1alpha1/organization
+  labels:
+    testing.upbound.io/example-name: b2b_admin
+  name: b2b-admin
+spec:
+  forProvider:
+    name: Partner administration
+    oidc:
+      grantTypes:
+      - client_credentials
+      - organization_switch
+
+---
+
+apiVersion: application.wso2is.crossplane.io/v1alpha1
+kind: AuthorizedAPI
+metadata:
+  annotations:
+    meta.upbound.io/example-id: organization/v1alpha1/organization
+  labels:
+    testing.upbound.io/example-name: org_groups
+  name: org-groups
+spec:
+  forProvider:
+    apiResourceIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: wso2is_api_resource
+    applicationIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: b2b_admin
+    scopes: ${data.wso2is_api_resource.org_groups.scope_names}
+
+---
+
+apiVersion: application.wso2is.crossplane.io/v1alpha1
+kind: ApplicationShare
+metadata:
+  annotations:
+    meta.upbound.io/example-id: organization/v1alpha1/organization
+  labels:
+    testing.upbound.io/example-name: b2b_admin
+  name: b2b-admin
+spec:
+  forProvider:
+    applicationIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: b2b_admin
+    organizationIdsRefs:
+    - name: partner
+
+---
+
+apiVersion: identity.wso2is.crossplane.io/v1alpha1
+kind: Group
+metadata:
+  annotations:
+    meta.upbound.io/example-id: organization/v1alpha1/organization
+  labels:
+    testing.upbound.io/example-name: partner_admins
+  name: partner-admins
+spec:
+  forProvider:
+    name: partner-admins
+    provider: ${wso2is.partner}

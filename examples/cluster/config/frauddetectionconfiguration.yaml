@@ -1,0 +1,10 @@
+# Events for a fraud detection service. When you delete the managed resource, the
+# settings keep their current values.
+apiVersion: config.wso2is.crossplane.io/v1alpha1
+kind: FraudDetectionConfiguration
+metadata:
+  name: fraud-detection
+spec:
+  forProvider:
+    publishUserInfo: false
+    logRequestPayload: false

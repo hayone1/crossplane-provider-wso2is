@@ -1,0 +1,29 @@
+apiVersion: notification.wso2is.crossplane.io/v1alpha1
+kind: NotificationTemplateType
+metadata:
+  annotations:
+    meta.upbound.io/example-id: notification/v1alpha1/notificationtemplatetype
+  labels:
+    testing.upbound.io/example-name: contract_ready
+  name: contract-ready
+spec:
+  forProvider:
+    channel: email
+    name: ContractReady
+
+---
+
+apiVersion: notification.wso2is.crossplane.io/v1alpha1
+kind: NotificationTemplate
+metadata:
+  annotations:
+    meta.upbound.io/example-id: notification/v1alpha1/notificationtemplatetype
+  labels:
+    testing.upbound.io/example-name: contract_ready
+  name: contract-ready
+spec:
+  forProvider:
+    body: <p>Hi {{user-name}}, your contract is ready to sign.</p>
+    channel: email
+    subject: Your contract is ready
+    type: ContractReady

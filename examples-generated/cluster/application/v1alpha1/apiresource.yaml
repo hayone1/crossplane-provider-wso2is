@@ -1,0 +1,19 @@
+apiVersion: application.wso2is.crossplane.io/v1alpha1
+kind: APIResource
+metadata:
+  annotations:
+    meta.upbound.io/example-id: application/v1alpha1/apiresource
+  labels:
+    testing.upbound.io/example-name: orders
+  name: orders
+spec:
+  forProvider:
+    description: Order management
+    identifier: https://api.example.com/orders
+    name: Orders API
+    scopes:
+    - displayName: Read orders
+      name: orders:read
+    - description: Create and update orders
+      displayName: Change orders
+      name: orders:write

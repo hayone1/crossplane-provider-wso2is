@@ -1,0 +1,10 @@
+# Signs WS-Federation (passive STS) requests. When you delete the managed resource, the
+# provider restores the server default.
+apiVersion: config.wso2is.m.crossplane.io/v1alpha1
+kind: PassiveSTSConfiguration
+metadata:
+  namespace: default
+  name: passive-sts
+spec:
+  forProvider:
+    enableRequestSigning: true

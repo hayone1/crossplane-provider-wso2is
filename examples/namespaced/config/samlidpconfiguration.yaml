@@ -1,0 +1,11 @@
+# The server's SAML identity provider metadata. When you delete the managed resource, the
+# provider restores the server defaults.
+apiVersion: config.wso2is.m.crossplane.io/v1alpha1
+kind: SAMLIdPConfiguration
+metadata:
+  namespace: default
+  name: saml-idp
+spec:
+  forProvider:
+    enableMetadataSigning: true
+    metadataValidityPeriod: 120

@@ -1,0 +1,12 @@
+apiVersion: config.wso2is.crossplane.io/v1alpha1
+kind: AdminAdvisoryBanner
+metadata:
+  annotations:
+    meta.upbound.io/example-id: config/v1alpha1/adminadvisorybanner
+  labels:
+    testing.upbound.io/example-name: this
+  name: this
+spec:
+  forProvider:
+    content: Authorized use only. Activity is logged.
+    enabled: true
