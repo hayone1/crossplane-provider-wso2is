@@ -1,0 +1,19 @@
+apiVersion: idp.wso2is.crossplane.io/v1alpha1
+kind: CustomAuthenticator
+metadata:
+  annotations:
+    meta.upbound.io/example-id: idp/v1alpha1/customauthenticator
+  labels:
+    testing.upbound.io/example-name: branch_pin
+  name: branch-pin
+spec:
+  forProvider:
+    authenticationType: VERIFICATION
+    displayName: Branch PIN
+    endpointAuthenticationPropertiesSecretRef:
+      key: example-key
+      name: example-secret
+      namespace: upbound-system
+    endpointAuthenticationType: BEARER
+    endpointUri: https://pin.example.com/authenticate
+    name: custom-branch-pin

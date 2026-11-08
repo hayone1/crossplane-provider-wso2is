@@ -1,0 +1,46 @@
+apiVersion: identity.wso2is.m.crossplane.io/v1alpha1
+kind: RoleAssignment
+metadata:
+  annotations:
+    meta.upbound.io/example-id: identity/v1alpha1/roleassignment
+  labels:
+    testing.upbound.io/example-name: support
+  name: support
+  namespace: default
+spec:
+  forProvider:
+    groupIdsRefs:
+    - name: support
+    roleIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: support
+
+---
+
+apiVersion: identity.wso2is.m.crossplane.io/v1alpha1
+kind: Group
+metadata:
+  annotations:
+    meta.upbound.io/example-id: identity/v1alpha1/roleassignment
+  labels:
+    testing.upbound.io/example-name: support
+  name: support
+  namespace: default
+spec:
+  forProvider:
+    name: support
+
+---
+
+apiVersion: identity.wso2is.m.crossplane.io/v1alpha1
+kind: Role
+metadata:
+  annotations:
+    meta.upbound.io/example-id: identity/v1alpha1/roleassignment
+  labels:
+    testing.upbound.io/example-name: support
+  name: support
+  namespace: default
+spec:
+  forProvider:
+    name: support

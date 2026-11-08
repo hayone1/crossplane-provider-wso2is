@@ -1,0 +1,10 @@
+# Turns on email domain discovery, so that the login page can send users to their
+# organization. When you delete the managed resource, discovery is off again.
+apiVersion: organization.wso2is.m.crossplane.io/v1alpha1
+kind: OrganizationDiscoveryConfiguration
+metadata:
+  namespace: default
+  name: discovery
+spec:
+  forProvider:
+    emailDomainEnabled: true

@@ -1,0 +1,24 @@
+# The SMS provider of the tenant, here Twilio with basic authentication.
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: crossplane-system
+  name: twilio-auth-token
+stringData:
+  token: replace-with-your-auth-token
+---
+apiVersion: notification.wso2is.crossplane.io/v1alpha1
+kind: SMSSender
+metadata:
+  name: twilio
+spec:
+  forProvider:
+    providerName: Twilio
+    providerUrl: https://api.twilio.com/2010-04-01/Accounts/AC0000/Messages.json
+    contentType: FORM
+    sender: "+15550000000"
+    key: AC0000
+    secretSecretRef:
+      namespace: crossplane-system
+      name: twilio-auth-token
+      key: token

@@ -1,0 +1,15 @@
+apiVersion: config.wso2is.m.crossplane.io/v1alpha1
+kind: ServerConfiguration
+metadata:
+  annotations:
+    meta.upbound.io/example-id: config/v1alpha1/serverconfiguration
+  labels:
+    testing.upbound.io/example-name: this
+  name: this
+  namespace: default
+spec:
+  forProvider:
+    enableMaximumSessionTimeout: true
+    idleSessionTimeout: 30
+    maximumSessionTimeout: 1440
+    rememberMePeriod: 10080

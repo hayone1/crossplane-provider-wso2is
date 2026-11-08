@@ -1,0 +1,29 @@
+# Sign-in with Google. The client secret comes from a Secret. Each key of that Secret has
+# the form <authenticator>.<property>.
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: default
+  name: google-idp-secrets
+stringData:
+  GoogleOIDCAuthenticator.ClientSecret: replace-with-your-client-secret
+---
+apiVersion: idp.wso2is.m.crossplane.io/v1alpha1
+kind: IdentityProvider
+metadata:
+  namespace: default
+  name: google
+spec:
+  forProvider:
+    name: Google
+    templateId: google-idp
+    federatedAuthenticators:
+      GoogleOIDCAuthenticator:
+        properties:
+          ClientId: 1234.apps.googleusercontent.com
+          callbackUrl: https://id.example.com/commonauth
+    federatedAuthenticatorSecretPropertiesSecretRef:
+      name: google-idp-secrets
+    jitProvisioning:
+      enabled: true
+      scheme: PROVISION_SILENTLY

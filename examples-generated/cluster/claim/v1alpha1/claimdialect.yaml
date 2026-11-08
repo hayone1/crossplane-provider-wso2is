@@ -1,0 +1,31 @@
+apiVersion: claim.wso2is.crossplane.io/v1alpha1
+kind: ClaimDialect
+metadata:
+  annotations:
+    meta.upbound.io/example-id: claim/v1alpha1/claimdialect
+  labels:
+    testing.upbound.io/example-name: legacy
+  name: legacy
+spec:
+  forProvider:
+    dialectUri: urn:example:legacy-claims
+
+---
+
+apiVersion: claim.wso2is.crossplane.io/v1alpha1
+kind: ExternalClaim
+metadata:
+  annotations:
+    meta.upbound.io/example-id: claim/v1alpha1/claimdialect
+  labels:
+    testing.upbound.io/example-name: mail
+  name: mail
+spec:
+  forProvider:
+    claimUri: mail
+    dialectUriSelector:
+      matchLabels:
+        testing.upbound.io/example-name: legacy
+    mappedLocalClaimUriSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example

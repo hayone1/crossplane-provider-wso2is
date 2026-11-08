@@ -1,0 +1,31 @@
+# Makes the deletion of users wait for approval. While the association exists, Crossplane
+# cannot delete users either, so do not use it for operations that Crossplane performs.
+apiVersion: workflow.wso2is.crossplane.io/v1alpha1
+kind: WorkflowAssociation
+metadata:
+  name: user-deletions
+spec:
+  forProvider:
+    name: User deletions need approval
+    operation: DELETE_USER
+    workflowIdRef:
+      name: user-deletions
+---
+apiVersion: workflow.wso2is.crossplane.io/v1alpha1
+kind: Workflow
+metadata:
+  name: user-deletions
+spec:
+  forProvider:
+    name: Administrator approval
+    steps:
+      - roleIdsRefs:
+          - name: approvers-admins
+---
+apiVersion: identity.wso2is.crossplane.io/v1alpha1
+kind: Role
+metadata:
+  name: approvers-admins
+spec:
+  forProvider:
+    name: deletion-approvers

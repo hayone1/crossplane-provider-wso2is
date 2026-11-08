@@ -1,0 +1,33 @@
+# Shares an application with one organization, so that the organization's users can
+# sign in to it.
+apiVersion: application.wso2is.crossplane.io/v1alpha1
+kind: ApplicationShare
+metadata:
+  name: partner-portal
+spec:
+  forProvider:
+    applicationIdRef:
+      name: partner-portal
+    organizationIdsRefs:
+      - name: partner-portal-org
+---
+apiVersion: application.wso2is.crossplane.io/v1alpha1
+kind: Application
+metadata:
+  name: partner-portal
+spec:
+  forProvider:
+    name: Partner Portal
+    oidc:
+      grantTypes:
+        - authorization_code
+      callbackUrls:
+        - https://partners.example.com/callback
+---
+apiVersion: organization.wso2is.crossplane.io/v1alpha1
+kind: Organization
+metadata:
+  name: partner-portal-org
+spec:
+  forProvider:
+    name: Portal Partner Inc

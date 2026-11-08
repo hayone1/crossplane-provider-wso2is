@@ -1,0 +1,23 @@
+apiVersion: idp.wso2is.m.crossplane.io/v1alpha1
+kind: IdentityProvider
+metadata:
+  annotations:
+    meta.upbound.io/example-id: idp/v1alpha1/identityprovider
+  labels:
+    testing.upbound.io/example-name: google
+  name: google
+  namespace: default
+spec:
+  forProvider:
+    federatedAuthenticators:
+      GoogleOIDCAuthenticator:
+        properties:
+          ClientId: 1234.apps.googleusercontent.com
+          callbackUrl: https://id.example.com/commonauth
+        secret_properties:
+          ClientSecret: ${var.google_client_secret}
+    jitProvisioning:
+      enabled: true
+      scheme: PROVISION_SILENTLY
+    name: Google
+    templateId: google-idp

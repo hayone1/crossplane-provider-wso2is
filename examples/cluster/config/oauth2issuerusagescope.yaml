@@ -1,0 +1,9 @@
+# Lets every organization use the root organization's token issuer. When you delete the
+# managed resource, the setting keeps its current value.
+apiVersion: config.wso2is.crossplane.io/v1alpha1
+kind: OAuth2IssuerUsageScope
+metadata:
+  name: issuer-usage
+spec:
+  forProvider:
+    usageScope: ALL_EXISTING_AND_FUTURE_ORGS

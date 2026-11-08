@@ -1,0 +1,99 @@
+# e2e: organization
+# A user, a group and a role inside a sub-organization. Each managed resource names the
+# ProviderConfig "organization", which signs in with an application of the root
+# organization and sets organizationID. docs/organizations.md shows how to set it up. A role
+# inside an organization uses the organization's own permission names.
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: default
+  name: org-user-password
+stringData:
+  password: Change-Me-Passw0rd!
+---
+apiVersion: identity.wso2is.m.crossplane.io/v1alpha1
+kind: User
+metadata:
+  namespace: default
+  name: org-pat
+spec:
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: organization
+  forProvider:
+    username: pat
+    email: pat@partner.example
+    passwordSecretRef:
+      name: org-user-password
+      key: password
+---
+apiVersion: identity.wso2is.m.crossplane.io/v1alpha1
+kind: Group
+metadata:
+  namespace: default
+  name: org-admins
+spec:
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: organization
+  forProvider:
+    name: administrators
+---
+apiVersion: identity.wso2is.m.crossplane.io/v1alpha1
+kind: GroupMembers
+metadata:
+  namespace: default
+  name: org-admins
+spec:
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: organization
+  forProvider:
+    groupIdRef:
+      name: org-admins
+    userIdsRefs:
+      - name: org-pat
+---
+apiVersion: identity.wso2is.m.crossplane.io/v1alpha1
+kind: Role
+metadata:
+  namespace: default
+  name: org-user-managers
+spec:
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: organization
+  forProvider:
+    name: user-managers
+    permissions:
+      - internal_org_user_mgt_view
+      - internal_org_user_mgt_list
+---
+apiVersion: identity.wso2is.m.crossplane.io/v1alpha1
+kind: RoleAssignment
+metadata:
+  namespace: default
+  name: org-user-managers
+spec:
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: organization
+  forProvider:
+    roleIdRef:
+      name: org-user-managers
+    groupIdsRefs:
+      - name: org-admins
+---
+# A sub-organization of the organization. The server creates an organization only from its
+# parent, so this Organization uses the parent's ProviderConfig.
+apiVersion: organization.wso2is.m.crossplane.io/v1alpha1
+kind: Organization
+metadata:
+  namespace: default
+  name: org-child
+spec:
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: organization
+  forProvider:
+    name: Partner EU

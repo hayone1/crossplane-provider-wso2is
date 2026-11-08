@@ -1,0 +1,15 @@
+apiVersion: governance.wso2is.crossplane.io/v1alpha1
+kind: GovernanceConnector
+metadata:
+  annotations:
+    meta.upbound.io/example-id: governance/v1alpha1/governanceconnector
+  labels:
+    testing.upbound.io/example-name: account_lock
+  name: account-lock
+spec:
+  forProvider:
+    name: account.lock.handler
+    properties:
+      account.lock.handler.On.Failure.Max.Attempts: "5"
+      account.lock.handler.Time: "15"
+      account.lock.handler.lock.on.max.failed.attempts.enable: "true"

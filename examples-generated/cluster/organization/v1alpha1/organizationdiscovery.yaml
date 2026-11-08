@@ -1,0 +1,44 @@
+apiVersion: organization.wso2is.crossplane.io/v1alpha1
+kind: OrganizationDiscovery
+metadata:
+  annotations:
+    meta.upbound.io/example-id: organization/v1alpha1/organizationdiscovery
+  labels:
+    testing.upbound.io/example-name: partner
+  name: partner
+spec:
+  forProvider:
+    emailDomains:
+    - partner.example
+    - partner-eu.example
+    organizationIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: partner
+
+---
+
+apiVersion: organization.wso2is.crossplane.io/v1alpha1
+kind: Organization
+metadata:
+  annotations:
+    meta.upbound.io/example-id: organization/v1alpha1/organizationdiscovery
+  labels:
+    testing.upbound.io/example-name: partner
+  name: partner
+spec:
+  forProvider:
+    name: Partner Inc
+
+---
+
+apiVersion: organization.wso2is.crossplane.io/v1alpha1
+kind: OrganizationDiscoveryConfiguration
+metadata:
+  annotations:
+    meta.upbound.io/example-id: organization/v1alpha1/organizationdiscovery
+  labels:
+    testing.upbound.io/example-name: this
+  name: this
+spec:
+  forProvider:
+    emailDomainEnabled: true

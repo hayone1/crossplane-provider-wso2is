@@ -1,0 +1,60 @@
+apiVersion: claim.wso2is.m.crossplane.io/v1alpha1
+kind: Claim
+metadata:
+  annotations:
+    meta.upbound.io/example-id: claim/v1alpha1/claim
+  labels:
+    testing.upbound.io/example-name: employee_id
+  name: employee-id
+  namespace: default
+spec:
+  forProvider:
+    attributeMappings:
+      PRIMARY: employeeId
+    claimUri: http://wso2.org/claims/employeeId
+    description: HR employee number
+    displayName: Employee ID
+    regex: ^E[0-9]{5}$
+    supportedByDefault: true
+
+---
+
+apiVersion: claim.wso2is.m.crossplane.io/v1alpha1
+kind: ExternalClaim
+metadata:
+  annotations:
+    meta.upbound.io/example-id: claim/v1alpha1/claim
+  labels:
+    testing.upbound.io/example-name: employee_id_oidc
+  name: employee-id-oidc
+  namespace: default
+spec:
+  forProvider:
+    claimUri: employee_id
+    dialectUriSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    mappedLocalClaimUriSelector:
+      matchLabels:
+        testing.upbound.io/example-name: employee_id
+
+---
+
+apiVersion: claim.wso2is.m.crossplane.io/v1alpha1
+kind: ExternalClaim
+metadata:
+  annotations:
+    meta.upbound.io/example-id: claim/v1alpha1/claim
+  labels:
+    testing.upbound.io/example-name: employee_id_scim
+  name: employee-id-scim
+  namespace: default
+spec:
+  forProvider:
+    claimUri: urn:scim:schemas:extension:custom:User:employeeId
+    dialectUriSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    mappedLocalClaimUriSelector:
+      matchLabels:
+        testing.upbound.io/example-name: employee_id

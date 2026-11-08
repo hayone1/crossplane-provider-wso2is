@@ -1,0 +1,32 @@
+# e2e: tenant
+# The SMTP server of a tenant. The super tenant reads its email settings from
+# deployment.toml, so this resource uses a ProviderConfig named "tenant" that manages
+# another tenant.
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: crossplane-system
+  name: smtp-password
+stringData:
+  password: replace-with-your-smtp-password
+---
+apiVersion: notification.wso2is.crossplane.io/v1alpha1
+kind: EmailSender
+metadata:
+  name: smtp
+spec:
+  providerConfigRef:
+    name: tenant
+  forProvider:
+    fromAddress: no-reply@acme.example
+    displayName: Acme
+    replyTo: support@acme.example
+    smtpHost: smtp.sendgrid.net
+    smtpPort: 587
+    username: apikey
+    passwordSecretRef:
+      namespace: crossplane-system
+      name: smtp-password
+      key: password
+    properties:
+      mail.smtp.starttls.enable: "true"

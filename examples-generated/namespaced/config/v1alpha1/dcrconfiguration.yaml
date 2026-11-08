@@ -1,0 +1,14 @@
+apiVersion: config.wso2is.m.crossplane.io/v1alpha1
+kind: DCRConfiguration
+metadata:
+  annotations:
+    meta.upbound.io/example-id: config/v1alpha1/dcrconfiguration
+  labels:
+    testing.upbound.io/example-name: this
+  name: this
+  namespace: default
+spec:
+  forProvider:
+    authenticationRequired: true
+    mandateSsa: true
+    ssaJwks: https://directory.example.com/jwks

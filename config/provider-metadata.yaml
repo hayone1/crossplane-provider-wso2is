@@ -1,0 +1,2195 @@
+name: hayone1/wso2is
+resources:
+    wso2is_action:
+        subCategory: ""
+        description: Manages an action. An action is an HTTPS endpoint that you run, and that WSO2 Identity Server calls at a fixed point in a flow. For example, the server can call an action before it issues an access token or an ID token, so that the action can add or change claims. Other actions run before a password update, before a profile update, or before registration. By default, a tenant can have one action of each type. To import an action, use the ID
+        name: wso2is_action
+        title: wso2is_action Resource - wso2is
+        examples:
+            - name: token_claims
+              manifest: |-
+                {
+                  "allowed_headers": [
+                    "x-request-id"
+                  ],
+                  "authentication_properties": {
+                    "header": "x-api-key",
+                    "value": "${var.hook_api_key}"
+                  },
+                  "authentication_type": "API_KEY",
+                  "endpoint_uri": "https://hooks.example.com/pre-issue-access-token",
+                  "name": "Add tenant claims",
+                  "rules": [
+                    {
+                      "expressions": [
+                        {
+                          "field": "grantType",
+                          "operator": "equals",
+                          "value": "client_credentials"
+                        }
+                      ]
+                    }
+                  ],
+                  "type": "pre_issue_access_token"
+                }
+        argumentDocs:
+            active: (Boolean) Whether the action is active. The default is true. The server creates actions as inactive, so the provider activates them after it creates them.
+            allowed_headers: (Set of String) Request headers forwarded to the endpoint (token actions only).
+            allowed_parameters: (Set of String) Request parameters forwarded to the endpoint (token actions only).
+            attributes: (Set of String) The claim URIs that trigger the action when they change. The server sends these claims to the action. Only pre_update_profile actions use this setting.
+            authentication_properties: (Map of String, Sensitive) The credentials for the endpoint. Use username and password for BASIC, accessToken for BEARER, or header and value for API_KEY. The server never returns these values, so the provider cannot notice changes made outside Terraform.
+            authentication_type: (String) How the server signs in to the endpoint. The allowed values are NONE, BASIC, BEARER and API_KEY.
+            description: (String) Description.
+            endpoint_uri: (String) HTTPS endpoint called by the server.
+            expressions: (Attributes List) Expressions, all of which must match. (see below for nested schema)
+            field: (String) Field, for example application, grantType or flow.
+            id: (String) Action ID.
+            name: (String) Name.
+            operator: (String) equals or notEquals.
+            password_sharing_certificate: '(String) pre_update_password only: PEM certificate used to encrypt the shared password.'
+            password_sharing_format: (String) How the server shares the new password with the action, either PLAIN_TEXT or SHA256_HASHED. Only pre_update_password actions use this setting.
+            rules: (Attributes List) Rules that decide when the action runs. The action runs when any rule matches. A rule matches when all of its expressions match. Without rules, the action always runs. Token actions can test the application (an application ID) and grantType fields. Password and profile actions can test the flow field, for example adminInitiatedPasswordReset or userInitiatedPasswordUpdate. (see below for nested schema)
+            type: (String) pre_issue_access_token, pre_issue_id_token, pre_update_password, pre_update_profile or pre_registration (the last needs to be enabled on the server). Changing it replaces the action.
+            value: (String) Value to compare with.
+            version: (String) Action version.
+        importStatements:
+            - terraform import wso2is_action.token_claims pre_issue_access_token/<action_id>
+    wso2is_admin_advisory_banner:
+        subCategory: ""
+        description: Manages the advisory banner on the Console sign-in page. The resource only changes the settings that you set. Other settings keep their current values. When you destroy this resource, the settings keep their current values, and Terraform stops managing them. Each tenant (or organization) has one set of these settings. To import them, use the ID admin_advisory_banner.
+        name: wso2is_admin_advisory_banner
+        title: wso2is_admin_advisory_banner Resource - wso2is
+        examples:
+            - name: this
+              manifest: |-
+                {
+                  "content": "Authorized use only. Activity is logged.",
+                  "enabled": true
+                }
+        argumentDocs:
+            content: (String) Banner text.
+            enabled: (Boolean) Show the banner.
+            id: (String) Always admin_advisory_banner.
+        importStatements:
+            - terraform import wso2is_admin_advisory_banner.this admin_advisory_banner
+    wso2is_api_resource:
+        subCategory: ""
+        description: Manages an API resource and its scopes. An API resource represents one of your APIs, and each scope is one permission in that API, such as orders:read. Use wso2is_application_authorized_api to let an application request the scopes, and wso2is_role to grant the scopes to users. To import an API resource, use its ID.
+        name: wso2is_api_resource
+        title: wso2is_api_resource Resource - wso2is
+        examples:
+            - name: orders
+              manifest: |-
+                {
+                  "description": "Order management",
+                  "identifier": "https://api.example.com/orders",
+                  "name": "Orders API",
+                  "scopes": [
+                    {
+                      "display_name": "Read orders",
+                      "name": "orders:read"
+                    },
+                    {
+                      "description": "Create and update orders",
+                      "display_name": "Change orders",
+                      "name": "orders:write"
+                    }
+                  ]
+                }
+        argumentDocs:
+            authorization_details_types: (Attributes Set) Rich authorization request (RFC 9396) types accepted by the API. (see below for nested schema)
+            description: (String) Description.
+            display_name: (String) Display name.
+            id: (String) API resource ID.
+            identifier: (String) Unique identifier, usually the API's base URL (it becomes the aud of tokens). Changing it replaces the API resource.
+            name: (String) Display name.
+            requires_authorization: (Boolean) Whether applications must be authorized for the API before they can request its scopes. The server only accepts this value at creation. The default is true.
+            schema: (String) JSON Schema the authorization details must match (use jsonencode).
+            scope_ids: (Map of String) Scope IDs by scope name.
+            scopes: (Attributes Set) Scopes of the API. Scope names must be unique across the tenant. Changes replace the whole scope set on the server. (see below for nested schema)
+            type: (String) The type of the API resource. APIs that you create with this resource have the type BUSINESS.
+        importStatements:
+            - terraform import wso2is_api_resource.orders <api_resource_id>
+    wso2is_application:
+        subCategory: ""
+        description: Manages an application, which the server also calls a service provider. The resource covers the application's sign-in protocols (OpenID Connect and OAuth2, SAML 2.0, WS-Federation and WS-Trust), its login flow, the user attributes that it requests, its roles and its advanced settings. If you leave out a setting, the server uses its default value, and the provider shows that value in the state. If you later remove a setting from the configuration, the setting keeps its last value. To change it, set the new value explicitly. Manage the API scopes that the application may request with wso2is_application_authorized_api. Share the application with sub-organizations with wso2is_application_share. To import an application, use its ID.
+        name: wso2is_application
+        title: wso2is_application Resource - wso2is
+        examples:
+            - name: portal
+              manifest: |-
+                {
+                  "access_url": "https://portal.example.com",
+                  "advanced_configuration": {
+                    "skip_login_consent": true
+                  },
+                  "authentication_sequence": {
+                    "steps": [
+                      {
+                        "options": [
+                          {
+                            "authenticator": "BasicAuthenticator",
+                            "idp": "LOCAL"
+                          }
+                        ]
+                      },
+                      {
+                        "options": [
+                          {
+                            "authenticator": "totp",
+                            "idp": "LOCAL"
+                          },
+                          {
+                            "authenticator": "email-otp-authenticator",
+                            "idp": "LOCAL"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "claim_configuration": {
+                    "requested_claims": [
+                      {
+                        "mandatory": true,
+                        "uri": "http://wso2.org/claims/emailaddress"
+                      },
+                      {
+                        "uri": "http://wso2.org/claims/givenname"
+                      }
+                    ]
+                  },
+                  "description": "Self-service portal",
+                  "name": "Customer Portal",
+                  "oidc": {
+                    "access_token": {
+                      "type": "JWT",
+                      "user_access_token_expiry_in_seconds": 900
+                    },
+                    "allowed_origins": [
+                      "https://portal.example.com"
+                    ],
+                    "callback_urls": [
+                      "https://portal.example.com/callback"
+                    ],
+                    "grant_types": [
+                      "authorization_code",
+                      "refresh_token"
+                    ],
+                    "logout": {
+                      "back_channel_logout_url": "https://portal.example.com/logout/backchannel"
+                    },
+                    "pkce": {
+                      "mandatory": true
+                    },
+                    "refresh_token": {
+                      "expiry_in_seconds": 86400,
+                      "renew_refresh_token": true
+                    }
+                  },
+                  "template_id": "oidc-web-application"
+                }
+            - name: backend
+              manifest: |-
+                {
+                  "name": "Billing Service",
+                  "oidc": {
+                    "grant_types": [
+                      "client_credentials"
+                    ]
+                  },
+                  "template_id": "m2m-application"
+                }
+            - name: wiki
+              manifest: |-
+                {
+                  "name": "Wiki",
+                  "saml": {
+                    "assertion_consumer_urls": [
+                      "https://wiki.example.com/saml/acs"
+                    ],
+                    "attribute_profile": {
+                      "enabled": true
+                    },
+                    "issuer": "https://wiki.example.com/saml",
+                    "single_sign_on_profile": {
+                      "assertion": {
+                        "name_id_format": "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
+                      }
+                    }
+                  }
+                }
+        argumentDocs:
+            access: (String) What the provider's user may do with this application. The value is READ for read-only system applications, and WRITE otherwise.
+            access_token: (Attributes) Access token settings. (see below for nested schema)
+            access_token_attributes: (Set of String) User attributes (claim names) included in JWT access tokens.
+            access_url: (String) URL users open to reach the application (shown in My Account for discoverable applications).
+            advanced_configuration: (Attributes) Advanced application settings. (see below for nested schema)
+            algorithm: (String) Key encryption algorithm, for example RSA-OAEP.
+            allow_federated_users: (Boolean) Allow notifications to users not in the local user store. The default is false.
+            allowed_audience: (String) Which roles the application uses. With APPLICATION, the application only uses roles that were created for it. With ORGANIZATION, it uses the organization's roles. New applications use APPLICATION by default.
+            allowed_origins: (Set of String) Origins allowed to call the OAuth2 endpoints from browsers (CORS).
+            always_include_attributes_in_response: (Boolean) Include attributes even when not requested. The default is false.
+            android_attestation_service_credentials: (String, Sensitive) The Google Play Integrity service account credentials, as JSON. The server never returns this value.
+            android_package_name: (String) Android package name.
+            android_thumbprints: (Set of String) Android signing certificate thumbprints.
+            apple_app_id: (String) Apple app ID.
+            application_access_token_expiry_in_seconds: (Number) Lifetime of tokens issued to the application (client credentials).
+            application_claim: (String) Claim name the application receives.
+            application_role: (String) Role name sent to the application.
+            application_subject_token_expiry_in_seconds: (Number) Subject token lifetime.
+            application_version: (String) Version of the application model on the server.
+            assertion: (Attributes) Assertion settings. (see below for nested schema)
+            assertion_consumer_urls: (List of String) Assertion consumer service URLs.
+            assertion_encryption_algorithm: (String) Assertion encryption algorithm URI.
+            associated_roles: (Attributes) Which roles the application's users can be assigned and receive in tokens. (see below for nested schema)
+            attestation: (Attributes) Client attestation for app-native authentication. (see below for nested schema)
+            attribute_consuming_service_index: (String) Attribute consuming service index assigned by the server.
+            attribute_profile: (Attributes) Attribute statement settings. (see below for nested schema)
+            attribute_step_id: (Number) Step (1-based) whose user attributes are used.
+            audience: (Set of String) Additional audiences.
+            audiences: (Set of String) Additional audiences.
+            auth_request_expiry_time: (Number) Authentication request expiry in seconds.
+            authentication_sequence: (Attributes) The login flow. It holds the authentication steps and an optional adaptive (conditional) authentication script. If you remove this block, the current flow stays as it is. To go back to the default flow, set type = "DEFAULT". (see below for nested schema)
+            authenticator: (String) Authenticator name, for example BasicAuthenticator, totp, email-otp-authenticator, sms-otp-authenticator, FIDOAuthenticator, MagicLinkAuthenticator, or a federated authenticator such as GoogleOIDCAuthenticator or OpenIDConnectAuthenticator.
+            back_channel_logout_url: (String) Back-channel logout URL.
+            binding_type: '(String) Token binding: None, cookie, sso-session, certificate, DPoP, client-request.'
+            bindings: '(Set of String) Allowed bindings: HTTP_POST, HTTP_REDIRECT, ARTIFACT.'
+            blocking: (Boolean) Wait for provisioning to finish.
+            callback_urls: (List of String) Authorized redirect URIs. A single value may be a regular expression prefixed with regexp=, for example regexp=(https://a.example.com/cb|https://b.example.com/cb).
+            certificate: (Attributes) Application certificate used to validate signed requests and encrypt tokens. (see below for nested schema)
+            certificate_alias: (String) Alias of the service's certificate in the tenant keystore.
+            ciba: (Attributes) Client Initiated Backchannel Authentication settings. (see below for nested schema)
+            claim: (String) Claim carrying roles. The default is http://wso2.org/claims/role.
+            claim_configuration: (Attributes) User attributes (claims) the application requests and how the subject and roles are sent. (see below for nested schema)
+            claim_mappings: (Attributes Set) Maps the application's claim names to local claims. The CUSTOM dialect needs these mappings. With the LOCAL dialect, the server creates them from requested_claims. (see below for nested schema)
+            client_authentication: (Attributes) Token endpoint client authentication. (see below for nested schema)
+            client_id: (String) OAuth2 client ID, when OpenID Connect is configured.
+            client_secret: (String, Sensitive) Client secret. Generated when not set (empty for public clients). WSO2 only accepts a custom secret at creation, so changing it replaces the application.
+            connector: (String) Outbound provisioning connector name, for example scim2, googleapps, salesforce.
+            default_assertion_consumer_url: (String) Default ACS URL. The default is the first of assertion_consumer_urls.
+            description: (String) Description shown in the Console.
+            dialect: (String) LOCAL (use local claim URIs) or CUSTOM (map application claim names with claim_mappings).
+            digest_algorithm: (String) Digest algorithm URI.
+            discoverable_by_end_users: (Boolean) Whether the application is listed in My Account. The default is false.
+            discoverable_groups: (Attributes Set) Groups whose members can discover the application in My Account. Empty means everyone. (see below for nested schema)
+            enable_api_based_authentication: (Boolean) Allow app-native (API based) authentication. The default is false.
+            enable_assertion_query_profile: (Boolean) Enable the assertion query/request profile. The default is false.
+            enable_authorization: (Boolean) Engage authorization policies during authentication. The default is false.
+            enable_idp_initiated_single_sign_on: (Boolean) Allow IdP initiated SSO. The default is false.
+            enable_jwt_scope_as_array: (Boolean) Send the scope claim of JWT access tokens as an array. The default is false.
+            enable_signature_validation: (Boolean) Require signed authentication requests.
+            enable_signature_validation_for_artifact_binding: (Boolean) Validate signatures of artifact resolve requests. The default is false.
+            enabled: (Boolean) Whether users can sign in to the application. The default is true.
+            encryption: (Attributes) ID token encryption. (see below for nested schema)
+            encryption_algorithm: (String) Request object key encryption algorithm.
+            encryption_method: (String) Request object content encryption method.
+            enhanced_org_authentication_enabled: (Boolean) Whether enhanced organization authentication is enabled (organization login uses the organization's own login settings).
+            expiry_in_seconds: (Number) ID token lifetime.
+            extend_renewed_refresh_token_expiry_time: (Boolean) Give renewed refresh tokens a full new lifetime. When not set, the server derives it from renew_refresh_token.
+            fragment: (Boolean) Whether this is a fragment (shared) application created by organization sharing.
+            front_channel_logout_url: (String) Front-channel logout URL.
+            grant_types: '(Set of String) Allowed grant types: authorization_code, implicit, password, client_credentials, refresh_token, urn:ietf:params:oauth:grant-type:device_code, urn:ietf:params:oauth:grant-type:token-exchange, urn:ietf:params:oauth:grant-type:jwt-bearer, urn:ietf:params:oauth:grant-type:saml2-bearer, urn:openid:params:grant-type:ciba, organization_switch, iwa:ntlm, account_switch.'
+            group_ids: (Set of String) Group IDs.
+            hybrid_flow: (Attributes) Hybrid flow settings. (see below for nested schema)
+            id: (String) Application ID.
+            id_token: (Attributes) ID token settings. (see below for nested schema)
+            idp: (String) LOCAL for local authenticators, otherwise the identity provider (connection) name.
+            idp_entity_id_alias: (String) IdP entity ID used for this service provider. The default is the resident IdP entity ID.
+            idp_initiated_single_logout: (Attributes) IdP initiated single logout. (see below for nested schema)
+            image_url: (String) Logo URL.
+            inbound: (Attributes) Users and groups provisioned through SCIM by this application. (see below for nested schema)
+            include_tenant_domain: (Boolean) Suffix the subject with the tenant domain. The default is false.
+            include_user_domain: (Boolean) Prefix role names with the user store domain. The default is true.
+            is_b2b_self_service_app: (Boolean) Whether the application is a B2B self-service application. The server only accepts this value when it creates the application, so changing it replaces the application.
+            is_consent_granted: (Boolean) Whether consent to publish the app details is granted. The default is false.
+            is_fapi_application: (Boolean) Make the application FAPI conformant. The server only accepts this value at creation.
+            is_fido_trusted_app: (Boolean) Whether the app is a FIDO trusted app. The default is false.
+            is_management_app: (Boolean) Whether the application can call the management (system) APIs. The server only accepts this value when it creates the application, so changing it replaces the application.
+            issuer: (String) SAML issuer, when SAML is configured.
+            jit: (Boolean) Provision just-in-time provisioned users too.
+            key_encryption_algorithm: (String) Key encryption algorithm URI.
+            local_claim: (String) Local claim URI.
+            local_role: (String) Local role name.
+            logout: (Attributes) OIDC logout endpoints of the application. (see below for nested schema)
+            logout_method: (String) BACKCHANNEL, FRONTCHANNEL_HTTP_REDIRECT or FRONTCHANNEL_HTTP_POST.
+            logout_request_url: (String) URL that accepts logout requests.
+            logout_response_url: (String) URL that accepts logout responses.
+            logout_return_url: (String) The URL that users go to after they log out, when the application does not send one. When you clear this value, the server stores .*, which allows any URL. The provider shows .* as unset.
+            mandatory: (Boolean) Whether the user must provide a value before signing in. The default is false.
+            mapped_local_subject_mandatory: (Boolean) Fail federated logins that have no mapped local user. The default is false.
+            mappings: (Attributes Set) Local role to application role name mappings. (see below for nested schema)
+            metadata_url: (String) Service provider metadata URL. The server reads issuer, ACS URLs and certificates from it when the protocol is configured.
+            method: (String) Content encryption method, for example A128GCM.
+            name: (String) Unique application name.
+            name_format: (String) Attribute name format URI.
+            name_id_format: (String) NameID format, for example urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress.
+            notification_channels: (Set of String) Allowed notification channels, for example email, sms, external.
+            oidc: (Attributes) OpenID Connect / OAuth2 configuration. Remove the attribute to remove the protocol from the application. (see below for nested schema)
+            options: (Attributes Set) Authenticators offered in this step (the login page shows them in the server's order). (see below for nested schema)
+            outbound_identity_providers: (Attributes List) Identity providers users are provisioned to. (see below for nested schema)
+            passive_sts: (Attributes) WS-Federation (passive STS) configuration. Remove the attribute to remove the protocol. (see below for nested schema)
+            pkce: (Attributes) PKCE settings. (see below for nested schema)
+            provisioning: (Attributes) Inbound (SCIM) and outbound provisioning. (see below for nested schema)
+            provisioning_userstore_domain: (String) User store that receives provisioned users (when not in proxy mode).
+            proxy_mode: (Boolean) Forward provisioning requests to outbound connectors without storing users locally. The default is false.
+            public_client: (Boolean) Allow the client to authenticate without a secret (single page and mobile apps). WSO2 still generates a client secret, which public clients do not use. The default is false.
+            realm: (String) Realm (wtrealm) of the relying party.
+            recipients: (Set of String) Additional recipients.
+            refresh_token: (Attributes) Refresh token settings. (see below for nested schema)
+            renew_refresh_token: (Boolean) Issue a new refresh token on every refresh.
+            reply_to: (String) URL tokens are posted to.
+            reply_to_logout: (String) URL users return to after logout.
+            request_object: (Attributes) Request object settings. (see below for nested schema)
+            request_path_authenticators: (List of String) Request path authenticators, for example BasicAuthRequestPathAuthenticator or OAuthRequestPathAuthenticator.
+            request_validation: (Attributes) Authentication request validation. (see below for nested schema)
+            requested_claims: (Attributes Set) The claims that the server shares with the application. With the LOCAL dialect, use local claim URIs (http://wso2.org/claims/...). With the CUSTOM dialect, use the application's claim names from claim_mappings. (see below for nested schema)
+            require_pushed_authorization_requests: (Boolean) Only accept authorization requests sent through PAR. The default is false.
+            response_signing: (Attributes) Response signing. (see below for nested schema)
+            response_type: (String) Comma separated allowed response types, for example code id_token.
+            return_authenticated_idp_list: (Boolean) Return the authenticated identity providers to the application. The default is false.
+            return_to_urls: (Set of String) Allowed return URLs.
+            revoke_tokens_when_idp_session_terminated: (Boolean) Revoke tokens when the user's login session ends. The default is false.
+            role: (Attributes) How roles are sent to the application. (see below for nested schema)
+            role_ids: (Set of String) The IDs of the roles that the application uses. Set this list when allowed_audience = "ORGANIZATION". When allowed_audience = "APPLICATION", the list is read-only and shows the roles that wso2is_role created for the application.
+            rules: (Boolean) Apply provisioning rules.
+            saas: (Boolean) Whether users of every tenant can sign in (super tenant only). The default is false.
+            saml: (Attributes) SAML 2.0 web SSO configuration. Either configure it manually (issuer and assertion_consumer_urls) or point to the service provider metadata with metadata_url. Remove the attribute to remove the protocol. (see below for nested schema)
+            scope_validators: (Set of String) Scope validators, for example Role based scope validator.
+            script: (String) Adaptive authentication script (JavaScript).
+            sector_identifier_uri: (String) Sector identifier URI for pairwise subjects.
+            service_provider_qualifier: (String) Qualifier to allow several service providers with the same issuer.
+            signature_validation_cert_alias: (String) Alias of the certificate used to validate request signatures.
+            signed_response_alg: (String) Signing algorithm, for example RS256 or PS256.
+            signing_alg: (String) Expected request object signing algorithm.
+            signing_algorithm: (String) Signing algorithm URI.
+            single_logout_profile: (Attributes) Single logout settings. (see below for nested schema)
+            single_sign_on_profile: (Attributes) SSO profile. (see below for nested schema)
+            skip_login_consent: (Boolean) Skip the attribute consent page at login. The default is false.
+            skip_logout_consent: (Boolean) Skip the logout confirmation page. The default is false.
+            skip_user_validation: (Boolean) Skip validating that the authenticated user matches login_hint. The default is false.
+            state: (String) ACTIVE or REVOKED.
+            steps: (Attributes List) Authentication steps, in order. Each step lets the user choose one of its options. (see below for nested schema)
+            subject: (Attributes) How the subject identifier is built. (see below for nested schema)
+            subject_step_id: (Number) Step (1-based) whose user identity is used as the subject.
+            subject_token: (Attributes) Subject token issuance for token exchange (impersonation). (see below for nested schema)
+            subject_type: (String) public or pairwise. The default is public.
+            support_plain_transform_algorithm: (Boolean) Accept the plain code challenge method. The default is false.
+            template_id: (String) The Console template that the application was created from, for example custom-application, m2m-application, single-page-application, oidc-web-application or react-application. The template only changes how the Console shows the application.
+            template_version: (String) Version of the Console template.
+            tls_client_auth_subject_dn: (String) Expected certificate subject DN for tls_client_auth.
+            token_endpoint_allow_reuse_pvt_key_jwt: (Boolean) Allow reusing a private key JWT (only with private_key_jwt). The default is false.
+            token_endpoint_auth_method: (String) client_secret_basic, client_secret_post, private_key_jwt, tls_client_auth. Empty means any method.
+            token_endpoint_auth_signing_alg: (String) Signing algorithm for private_key_jwt.
+            token_issuer_organization_id: (String) The organization whose issuer signs the tokens. This setting only applies to applications inside an organization, that is, with a provider that sets organization_id. By default, the root organization signs the tokens. To make the application's own organization the issuer, set its organization ID. In the root organization, the value is "".
+            trusted_app: (Attributes) Trusted (FIDO) application settings for passkeys in native apps. (see below for nested schema)
+            type: (String) PEM or JWKS.
+            uri: (String) Claim URI.
+            use_external_consent_page: (Boolean) Use an external consent page. The default is false.
+            use_mapped_local_subject: (Boolean) Use the local user mapped to a federated user as the subject. The server turns it on when the application is shared with organizations.
+            user_access_token_expiry_in_seconds: (Number) Lifetime of tokens issued to users.
+            user_store: (String) User store domain of the groups, for example PRIMARY.
+            validate_request_object_signature: (Boolean) Require signed request objects. The default is false.
+            validate_token_binding: (Boolean) Validate the token binding on API calls. The default is false.
+            value: (String) PEM certificate, or the JWKS endpoint URL.
+            ws_trust: (Attributes) WS-Trust configuration (needs the WS-Trust connector installed on the server). Remove the attribute to remove the protocol. (see below for nested schema)
+        importStatements:
+            - terraform import wso2is_application.portal 5f6b7c8d-1234-4cde-9abc-0123456789ab
+    wso2is_application_authorized_api:
+        subCategory: ""
+        description: Allows an application to request the scopes of an API resource. In the Console, this is the application's API Authorization tab. Use it for your own APIs (wso2is_api_resource) and for the server's management APIs. To find a management API, use the wso2is_api_resource data source. For example, you can allow an M2M application to call the user management API. To import, use the ID <application_id>/<api_resource_id>.
+        name: wso2is_application_authorized_api
+        title: wso2is_application_authorized_api Resource - wso2is
+        examples:
+            - name: orders
+              manifest: |-
+                {
+                  "api_resource_id": "${wso2is_api_resource.orders.id}",
+                  "application_id": "${wso2is_application.backend.id}",
+                  "scopes": [
+                    "orders:read",
+                    "orders:write"
+                  ]
+                }
+              references:
+                api_resource_id: wso2is_api_resource.orders.id
+                application_id: wso2is_application.backend.id
+              dependencies:
+                wso2is_api_resource.orders: |-
+                    {
+                      "identifier": "https://api.example.com/orders",
+                      "name": "Orders API",
+                      "scopes": [
+                        {
+                          "display_name": "Read orders",
+                          "name": "orders:read"
+                        },
+                        {
+                          "display_name": "Change orders",
+                          "name": "orders:write"
+                        }
+                      ]
+                    }
+                wso2is_application.backend: |-
+                    {
+                      "name": "Order Processor",
+                      "oidc": {
+                        "grant_types": [
+                          "client_credentials"
+                        ]
+                      }
+                    }
+            - name: user_management
+              manifest: |-
+                {
+                  "api_resource_id": "${data.wso2is_api_resource.scim_users.id}",
+                  "application_id": "${wso2is_application.backend.id}",
+                  "scopes": "${data.wso2is_api_resource.scim_users.scope_names}"
+                }
+              references:
+                api_resource_id: data.wso2is_api_resource.scim_users.id
+                application_id: wso2is_application.backend.id
+                scopes: data.wso2is_api_resource.scim_users.scope_names
+              dependencies:
+                wso2is_api_resource.orders: |-
+                    {
+                      "identifier": "https://api.example.com/orders",
+                      "name": "Orders API",
+                      "scopes": [
+                        {
+                          "display_name": "Read orders",
+                          "name": "orders:read"
+                        },
+                        {
+                          "display_name": "Change orders",
+                          "name": "orders:write"
+                        }
+                      ]
+                    }
+                wso2is_application.backend: |-
+                    {
+                      "name": "Order Processor",
+                      "oidc": {
+                        "grant_types": [
+                          "client_credentials"
+                        ]
+                      }
+                    }
+        argumentDocs:
+            api_resource_id: (String) API resource ID.
+            application_id: (String) Application ID.
+            authorization_details_types: (Set of String) Authorization details types the application may request. Changing them replaces the authorization.
+            id: (String) <application_id>/<api_resource_id>.
+            identifier: (String) Identifier of the API resource.
+            policy_identifier: (String) The authorization policy. With RBAC, users get the scopes that their roles grant. With No Policy, every signed-in user gets the authorized scopes. The default is RBAC.
+            scopes: (Set of String) Scope names the application may request.
+        importStatements:
+            - terraform import wso2is_application_authorized_api.orders <application_id>/<api_resource_id>
+    wso2is_application_share:
+        subCategory: ""
+        description: Shares an application with sub-organizations. Users of those organizations can then sign in to the application, and each organization gets its own copy of it. The resource manages the complete list of organizations that the application is shared with. To import, use the application ID.
+        name: wso2is_application_share
+        title: wso2is_application_share Resource - wso2is
+        examples:
+            - name: portal
+              manifest: |-
+                {
+                  "application_id": "${wso2is_application.portal.id}",
+                  "organization_ids": [
+                    "${wso2is_organization.partner.id}"
+                  ]
+                }
+              references:
+                application_id: wso2is_application.portal.id
+                organization_ids: wso2is_organization.partner.id
+              dependencies:
+                wso2is_application.portal: |-
+                    {
+                      "name": "Partner Portal",
+                      "oidc": {
+                        "callback_urls": [
+                          "https://partners.example.com/callback"
+                        ],
+                        "grant_types": [
+                          "authorization_code"
+                        ]
+                      }
+                    }
+                wso2is_organization.partner: |-
+                    {
+                      "name": "Partner Inc"
+                    }
+        argumentDocs:
+            application_id: (String) Application ID.
+            id: (String) Same as application_id.
+            organization_ids: (Set of String) IDs of the organizations to share the application with.
+            share_with_all_children: (Boolean) Share with every current and future child organization. Conflicts with organization_ids.
+        importStatements:
+            - terraform import wso2is_application_share.portal <application_id>
+    wso2is_branding_preference:
+        subCategory: ""
+        description: Manages the branding of the login, registration, account recovery and My Account pages. The branding applies to the whole organization or to one application. To import, use the ID ORG/
+        name: wso2is_branding_preference
+        title: wso2is_branding_preference Resource - wso2is
+        examples:
+            - name: org
+              manifest: |-
+                {
+                  "locale": "en-US",
+                  "preference": "${jsonencode({\n    configs = { isBrandingEnabled = true }\n    organizationDetails = {\n      displayName  = \"Acme\"\n      supportEmail = \"support@acme.example\"\n    }\n    images = {\n      logo = { imgURL = \"https://cdn.acme.example/logo.svg\", altText = \"Acme\" }\n    }\n    theme = {\n      activeTheme = \"LIGHT\"\n      LIGHT       = { colors = { primary = { main = \"#FF7300\" } } }\n    }\n    layout = { activeLayout = \"centered\" }\n  })}"
+                }
+        argumentDocs:
+            application_id: (String) Application ID, for type = "APP".
+            id: (String) <type>/<name>/<locale>.
+            locale: (String) Locale, for example en-US (default) or fr-FR.
+            preference: '(String) Branding preference document (use jsonencode), as in the Console''s Branding section: configs (isBrandingEnabled, removeDefaultBranding, selfSignUpEnabled), organizationDetails (displayName, supportEmail, siteTitle, copyrightText), images (logo, favicon, myAccountLogo), urls (privacyPolicyURL, termsOfUseURL, cookiePolicyURL), theme (activeTheme, LIGHT/DARK colors, fonts, buttons, inputs, loginBox, footer), and layout (activeLayout: centered, left-image, right-aligned, custom, ...). The server stores the document as given.'
+            type: (String) ORG (the organization, default) or APP (one application).
+        importStatements:
+            - terraform import wso2is_branding_preference.org ORG/carbon.super/en-US
+    wso2is_branding_text:
+        subCategory: ""
+        description: Changes the text on one login or self-service screen, in one language (locale). The text applies to the whole organization or to one application. To import, use the ID ORG/
+        name: wso2is_branding_text
+        title: wso2is_branding_text Resource - wso2is
+        examples:
+            - name: login
+              manifest: |-
+                {
+                  "locale": "en-US",
+                  "screen": "login",
+                  "text": {
+                    "login.button": "Continue",
+                    "login.heading": "Sign in to Acme"
+                  }
+                }
+        argumentDocs:
+            application_id: (String) Application ID, for type = "APP".
+            id: (String) <type>/<name>/<locale>/<screen>.
+            locale: (String) Locale, for example en-US (default) or fr-FR.
+            screen: (String) Screen whose texts are customized, for example common, login, sign-up, password-recovery, password-reset, password-reset-success, email-otp, sms-otp, totp, email-link-expiry, myaccount.
+            text: (Map of String) Text values by key, for example { "login.heading" = "Sign in to Acme" }. The keys are listed in the Console's Text tab of the branding section.
+            type: (String) ORG (the organization, default) or APP (one application).
+        importStatements:
+            - terraform import wso2is_branding_text.login ORG/carbon.super/en-US/login
+    wso2is_claim:
+        subCategory: ""
+        description: Manages a local claim. A local claim is a user attribute in the http://wso2.org/claims dialect. The resource also sets where each user store keeps the attribute. Applications do not see local claims directly. To send the attribute to applications, map it in the OIDC dialect with wso2is_external_claim (dialect_uri = "http://wso2.org/oidc/claim"), and add it to an OIDC scope with wso2is_oidc_scope. To show it in the SCIM APIs, map it in a SCIM dialect too. To import a claim, use its claim URI.
+        name: wso2is_claim
+        title: wso2is_claim Resource - wso2is
+        examples:
+            - name: employee_id
+              manifest: |-
+                {
+                  "attribute_mappings": {
+                    "PRIMARY": "employeeId"
+                  },
+                  "claim_uri": "http://wso2.org/claims/employeeId",
+                  "description": "HR employee number",
+                  "display_name": "Employee ID",
+                  "regex": "^E[0-9]{5}$",
+                  "supported_by_default": true
+                }
+              dependencies:
+                wso2is_external_claim.employee_id_oidc: |-
+                    {
+                      "claim_uri": "employee_id",
+                      "dialect_uri": "http://wso2.org/oidc/claim",
+                      "mapped_local_claim_uri": "${wso2is_claim.employee_id.claim_uri}"
+                    }
+                wso2is_external_claim.employee_id_scim: |-
+                    {
+                      "claim_uri": "urn:scim:schemas:extension:custom:User:employeeId",
+                      "dialect_uri": "urn:scim:schemas:extension:custom:User",
+                      "mapped_local_claim_uri": "${wso2is_claim.employee_id.claim_uri}"
+                    }
+        argumentDocs:
+            attribute_mappings: (Map of String) User store attribute (column or LDAP attribute) by user store domain, for example { PRIMARY = "employeeId" }.
+            canonical_values: (Attributes List) Allowed values (shown as a drop-down). (see below for nested schema)
+            claim_uri: (String) Claim URI, for example http://wso2.org/claims/employeeId. Changing it replaces the claim.
+            data_type: (String) string, boolean, integer, decimal, date_time or complex. The default is string.
+            description: (String) Description.
+            display_name: (String) Name shown in forms and the Console.
+            display_order: (Number) Position of the attribute in profile and registration forms. The default is 0.
+            excluded_user_stores: (Set of String) User stores where the attribute is not available.
+            id: (String) Claim ID (base64url of the claim URI).
+            input_type: (String) Input control used in forms, for example text_input, dropdown, checkbox_group, radio_group, date_picker, toggle.
+            label: (String) Display label.
+            managed_in_user_store: (Boolean) Whether the value is stored in the user store (otherwise in the identity database).
+            multi_valued: (Boolean) The attribute holds several values. The default is false.
+            profiles: '(Attributes Map) Per-profile overrides (WSO2 IS 7.1+), keyed by profile: console, endUser, selfRegistration. (see below for nested schema)'
+            properties: (Map of String) Additional claim properties. Only the keys listed here are managed.
+            read_only: (Boolean) Users cannot change the value. The default is false.
+            regex: (String) Regular expression values must match.
+            required: (Boolean) A value is mandatory in profiles. The default is false.
+            shared_profile_value_resolving_method: '(String) How the value is resolved for users shared with sub-organizations: FromOrigin, FromSharedProfile or FromFirstFoundInHierarchy.'
+            sub_attributes: (List of String) Sub-attribute claim URIs of a complex attribute.
+            supported_by_default: (Boolean) Shown in user profiles (and self registration) by default. The default is false.
+            uniqueness_scope: '(String) Uniqueness validation: NONE, WITHIN_USERSTORE or ACROSS_USERSTORES.'
+            value: (String) Stored value.
+        importStatements:
+            - terraform import wso2is_claim.employee_id http://wso2.org/claims/employeeId
+    wso2is_claim_dialect:
+        subCategory: ""
+        description: Manages an external claim dialect. A dialect is a set of claim URIs that another system uses, such as an identity provider or an older application. Map each claim of the dialect to a local claim with wso2is_external_claim. Deleting a dialect also deletes its claims. To import a dialect, use its dialect URI.
+        name: wso2is_claim_dialect
+        title: wso2is_claim_dialect Resource - wso2is
+        examples:
+            - name: legacy
+              manifest: |-
+                {
+                  "dialect_uri": "urn:example:legacy-claims"
+                }
+              dependencies:
+                wso2is_external_claim.mail: |-
+                    {
+                      "claim_uri": "mail",
+                      "dialect_uri": "${wso2is_claim_dialect.legacy.dialect_uri}",
+                      "mapped_local_claim_uri": "http://wso2.org/claims/emailaddress"
+                    }
+        argumentDocs:
+            dialect_uri: (String) Dialect URI, for example urn:example:claims. Changing it replaces the dialect.
+            id: (String) Dialect ID (base64url of the URI).
+        importStatements:
+            - terraform import wso2is_claim_dialect.legacy urn:example:legacy-claims
+    wso2is_cors_configuration:
+        subCategory: ""
+        description: Manages the CORS settings of the server's endpoints. The allowed origins come from the oidc.allowed_origins setting of each application. The resource only changes the settings that you set. Other settings keep their current values. When you destroy this resource, the settings keep their current values, and Terraform stops managing them. Each tenant (or organization) has one set of these settings. To import them, use the ID cors_configuration.
+        name: wso2is_cors_configuration
+        title: wso2is_cors_configuration Resource - wso2is
+        examples:
+            - name: this
+              manifest: |-
+                {
+                  "exposed_headers": [
+                    "Location"
+                  ],
+                  "max_age": 3600,
+                  "supports_credentials": true
+                }
+        argumentDocs:
+            allow_any_origin: (Boolean) Allow every origin (not recommended).
+            allow_generic_http_requests: (Boolean) Let non-CORS requests through.
+            allow_subdomains: (Boolean) Allow subdomains of the allowed origins.
+            exposed_headers: (Set of String) Response headers exposed to browsers.
+            id: (String) Always cors_configuration.
+            max_age: (Number) Preflight cache lifetime in seconds (-1 = not set).
+            support_any_header: (Boolean) Allow every request header.
+            supported_headers: (Set of String) Request headers allowed when support_any_header is off.
+            supported_methods: (Set of String) HTTP methods allowed in CORS requests.
+            supports_credentials: (Boolean) Allow credentials (cookies, authorization headers).
+        importStatements:
+            - terraform import wso2is_cors_configuration.this cors_configuration
+    wso2is_custom_authenticator:
+        subCategory: ""
+        description: Manages a custom local authenticator (WSO2 IS 7.1 and later). A custom authenticator is a login step that your own HTTPS service performs, and that WSO2 calls during login. To use it, add it to an application's authentication_sequence with idp = "LOCAL" and authenticator =
+        name: wso2is_custom_authenticator
+        title: wso2is_custom_authenticator Resource - wso2is
+        examples:
+            - name: branch_pin
+              manifest: |-
+                {
+                  "authentication_type": "VERIFICATION",
+                  "display_name": "Branch PIN",
+                  "endpoint_authentication_properties": {
+                    "accessToken": "${var.pin_service_token}"
+                  },
+                  "endpoint_authentication_type": "BEARER",
+                  "endpoint_uri": "https://pin.example.com/authenticate",
+                  "name": "custom-branch-pin"
+                }
+        argumentDocs:
+            authentication_type: (String) IDENTIFICATION (the service identifies the user, for a first step) or VERIFICATION (it verifies an already identified user, for later steps). Changing it replaces the authenticator.
+            description: (String) Description.
+            display_name: (String) Name shown on the login page.
+            enabled: (Boolean) Whether the authenticator can be used. The default is true.
+            endpoint_authentication_properties: (Map of String, Sensitive) The credentials for the service. Use username and password, accessToken, or header and value, to match endpoint_authentication_type. The server never returns these values.
+            endpoint_authentication_type: (String) How WSO2 signs in to the service. The allowed values are NONE, BASIC, BEARER and API_KEY.
+            endpoint_uri: (String) HTTPS endpoint of the authentication service.
+            id: (String) Authenticator ID (base64url of the name).
+            image_url: (String) Logo URL.
+            name: (String) The authenticator name. It must start with custom-. Changing the name replaces the authenticator.
+        importStatements:
+            - terraform import wso2is_custom_authenticator.branch_pin custom-branch-pin
+    wso2is_dcr_configuration:
+        subCategory: ""
+        description: Manages OAuth2 dynamic client registration (/api/identity/oauth2/dcr/v1.1/register). The resource only changes the settings that you set. Other settings keep their current values. When you destroy this resource, the settings keep their current values, and Terraform stops managing them. Each tenant (or organization) has one set of these settings. To import them, use the ID dcr_configuration.
+        name: wso2is_dcr_configuration
+        title: wso2is_dcr_configuration Resource - wso2is
+        examples:
+            - name: this
+              manifest: |-
+                {
+                  "authentication_required": true,
+                  "mandate_ssa": true,
+                  "ssa_jwks": "https://directory.example.com/jwks"
+                }
+        argumentDocs:
+            authentication_required: (Boolean) Require authentication to register clients.
+            enable_fapi_enforcement: (Boolean) Enforce FAPI rules on registered clients.
+            id: (String) Always dcr_configuration.
+            mandate_ssa: (Boolean) Require a software statement assertion.
+            ssa_jwks: (String) JWKS URL used to validate software statement assertions.
+        importStatements:
+            - terraform import wso2is_dcr_configuration.this dcr_configuration
+    wso2is_email_sender:
+        subCategory: ""
+        description: Manages the tenant's email provider. In the Console, this is Notification Channels > Email Provider. The server uses it to send verification, account recovery, one-time password and notification emails. Each tenant has one email provider. This resource does not work in the super tenant (carbon.super). The super tenant reads its email provider only from deployment.toml ([output_adapter.email]), and the API answers HTTP 405. Use this resource with a provider that manages another tenant. To import, use the ID EmailPublisher.
+        name: wso2is_email_sender
+        title: wso2is_email_sender Resource - wso2is
+        examples:
+            - name: smtp
+              manifest: |-
+                {
+                  "display_name": "Acme",
+                  "from_address": "no-reply@acme.com",
+                  "password": "${var.smtp_password}",
+                  "properties": {
+                    "mail.smtp.starttls.enable": "true"
+                  },
+                  "provider": "${wso2is.acme}",
+                  "reply_to": "support@acme.com",
+                  "smtp_host": "smtp.sendgrid.net",
+                  "smtp_port": 587,
+                  "username": "apikey"
+                }
+              references:
+                password: var.smtp_password
+                provider: wso2is.acme
+        argumentDocs:
+            auth_type: (String) How the server signs in to the email provider. BASIC is the default and uses username and password. CLIENT_CREDENTIAL uses the clientId, clientSecret, tokenEndpoint and scopes properties. BEARER uses accessToken. API_KEY is for HTTP providers. NONE sends no credentials.
+            display_name: (String) Sender name shown to recipients (mail.smtp.signature). SMTP providers need this value.
+            from_address: (String) Sender address.
+            id: (String) Always EmailPublisher.
+            password: (String, Sensitive) Password for BASIC authentication. The server never returns this value.
+            properties: (Map of String) Additional properties, for example mail.smtp.starttls.enable, mail.smtp.auth, or for HTTP providers body, http.client.method, contentType, http.headers. Only the keys listed are managed.
+            provider_type: (String) The kind of email provider. SMTP is the default. With HTTP (WSO2 IS 7.3 and later), the server posts each email to provider_url.
+            provider_url: (String) Endpoint of an HTTP email provider. Set the request template in properties.body.
+            reply_to: (String) Reply-to address (mail.smtp.replyTo). SMTP providers need this value.
+            secret_properties: (Map of String, Sensitive) Confidential properties such as clientSecret or accessToken. The server never returns this value.
+            smtp_host: (String) SMTP server host (SMTP providers).
+            smtp_port: (Number) SMTP server port, for example 587.
+            username: (String) Username for BASIC authentication.
+        importStatements:
+            - terraform import wso2is_email_sender.smtp EmailPublisher
+    wso2is_external_claim:
+        subCategory: ""
+        description: 'Maps a claim of an external dialect to a local claim. You can also use the built-in dialects: http://wso2.org/oidc/claim holds the OIDC claims. Add them to tokens with wso2is_oidc_scope.urn:ietf:params:scim:schemas:core:2.0:User, urn:scim:wso2:schema and urn:scim:schemas:extension:custom:User hold SCIM attributes. A new server has no custom SCIM dialect. The provider creates it when you add the first claim to it, and leaves it in place when you destroy the resource. To import, use the ID <dialect_uri>|<claim_uri>.'
+        name: wso2is_external_claim
+        title: wso2is_external_claim Resource - wso2is
+        examples:
+            - name: department
+              manifest: |-
+                {
+                  "claim_uri": "department",
+                  "dialect_uri": "http://wso2.org/oidc/claim",
+                  "mapped_local_claim_uri": "http://wso2.org/claims/department"
+                }
+        argumentDocs:
+            claim_uri: (String) External claim URI, for example employee_id (OIDC) or urn:scim:schemas:extension:custom:User:employeeId (SCIM). Changing it replaces the claim.
+            dialect_uri: (String) Dialect URI. Changing it replaces the claim.
+            http://wso2.org/oidc/claim: holds the OIDC claims. Add them to tokens with wso2is_oidc_scope.
+            id: (String) <dialect id>/<claim id>.
+            mapped_local_claim_uri: (String) Local claim URI it maps to.
+            urn:ietf:params:scim:schemas:core:2.0:User: ', urn:scim:wso2:schema and urn:scim:schemas:extension:custom:User hold SCIM attributes.'
+        importStatements:
+            - terraform import wso2is_external_claim.department "http://wso2.org/oidc/claim|department"
+    wso2is_flow:
+        subCategory: ""
+        description: Manages a flow that the Console's flow builder can also edit (WSO2 IS 7.2 and later). A flow is the self sign-up form and its steps, the password recovery flow, or the invited user registration flow. Use this resource to build a custom sign-up form. In a flow, form fields map to claims, and executors do the work of each step. Examples of executors are PasswordProvisioningExecutor, EmailOTPExecutor, UserProvisioningExecutor and federated executors such as GoogleExecutor. steps holds the same JSON document that the Console stores (GET /api/server/v1/flow?flowType=...). You can design the flow in the Console and copy it with the wso2is_flow data source, or write it with jsonencode. When you destroy the resource, the provider turns the flow off and deletes it. By default, WSO2 IS 7.3.0 does not allow the API to delete the root organization's flow. In that case, the provider only turns the flow off. The server behaviour guide explains how to allow deletion. To import a flow, use its flow type.
+        name: wso2is_flow
+        title: wso2is_flow Resource - wso2is
+        examples:
+            - name: sign_up
+              manifest: |-
+                {
+                  "completion_configs": {
+                    "isAutoLoginEnabled": "true",
+                    "isEmailVerificationEnabled": "false"
+                  },
+                  "flow_type": "REGISTRATION",
+                  "steps": "${jsonencode([\n    {\n      id       = \"sign_up_form\"\n      type     = \"VIEW\"\n      size     = { width = 350, height = 500 }\n      position = { x = 300, y = 200 }\n      data = {\n        components = [\n          { id = \"heading\", category = \"DISPLAY\", type = \"TYPOGRAPHY\", variant = \"H3\", config = { text = \"Create your account\" } },\n          {\n            id = \"form\", category = \"BLOCK\", type = \"FORM\", config = {}\n            components = [\n              { id = \"username\", category = \"FIELD\", type = \"INPUT\", variant = \"TEXT\", config = { type = \"text\", label = \"Username\", required = true, identifier = \"http://wso2.org/claims/username\" } },\n              { id = \"email\", category = \"FIELD\", type = \"INPUT\", variant = \"EMAIL\", config = { type = \"email\", label = \"Email\", required = true, identifier = \"http://wso2.org/claims/emailaddress\" } },\n              { id = \"member_no\", category = \"FIELD\", type = \"INPUT\", variant = \"TEXT\", config = { type = \"text\", label = \"Membership number\", required = false, identifier = \"http://wso2.org/claims/membershipNumber\" } },\n              { id = \"password\", category = \"FIELD\", type = \"INPUT\", variant = \"PASSWORD\", config = { type = \"password\", label = \"Password\", required = true, identifier = \"password\" } },\n              { id = \"submit\", category = \"ACTION\", type = \"BUTTON\", variant = \"PRIMARY\", config = { type = \"submit\", text = \"Sign up\" },\n              action = { type = \"EXECUTOR\", executor = { name = \"PasswordProvisioningExecutor\" }, next = \"END\" } },\n            ]\n          },\n        ]\n      }\n    },\n    {\n      id       = \"END\"\n      type     = \"END\"\n      size     = { width = 200, height = 100 }\n      position = { x = 800, y = 200 }\n      data     = { action = { type = \"EXECUTOR\", executor = { name = \"UserProvisioningExecutor\" } } }\n    },\n  ])}"
+                }
+        argumentDocs:
+            completion_configs: (Map of String) Settings that apply when the flow finishes, for example isEmailVerificationEnabled, isAutoLoginEnabled, isAccountLockOnCreationEnabled and isFlowCompletionNotificationEnabled. The values are the strings "true" and "false". The provider only manages the keys that you list.
+            enabled: (Boolean) Whether the flow replaces the older, built-in flow. For registration, this means that the flow builds the self sign-up page. The default is true.
+            flow_type: (String) REGISTRATION, PASSWORD_RECOVERY or INVITED_USER_REGISTRATION.
+            id: (String) Same as flow_type.
+            steps: '(String) The steps of the flow, as a JSON array. Each step has an id, a type (such as VIEW, REDIRECTION or END), a size and a position (its place in the Console''s editor), and data. The data.components list holds the step''s content: TYPOGRAPHY text, and FORM blocks with INPUT fields and BUTTONs. Each field''s config.identifier is a claim URI, or password or otp. Each button has an action, for example { type = "EXECUTOR", executor = { name = ... }, next = <step id or "END"> }. The last step is { id = "END", type = "END" }.'
+        importStatements:
+            - terraform import wso2is_flow.sign_up REGISTRATION
+    wso2is_fraud_detection_configuration:
+        subCategory: ""
+        description: Manages how the server sends events to a fraud detection service. The resource only changes the settings that you set. Other settings keep their current values. When you destroy this resource, the settings keep their current values, and Terraform stops managing them. Each tenant (or organization) has one set of these settings. To import them, use the ID fraud_detection_configuration.
+        name: wso2is_fraud_detection_configuration
+        title: wso2is_fraud_detection_configuration Resource - wso2is
+        examples:
+            - name: this
+              manifest: |-
+                {
+                  "log_request_payload": false,
+                  "publish_user_info": true
+                }
+        argumentDocs:
+            id: (String) Always fraud_detection_configuration.
+            log_request_payload: (Boolean) Log the payload sent to the fraud detection service.
+            publish_device_metadata: (Boolean) Include device metadata in events.
+            publish_user_info: (Boolean) Include user information in events.
+        importStatements:
+            - terraform import wso2is_fraud_detection_configuration.this fraud_detection_configuration
+    wso2is_governance_connector:
+        subCategory: ""
+        description: Manages an identity governance connector. Governance connectors hold the tenant-wide login, registration, account recovery and account policies. In the Console, they are under Login & Registration. The resource only manages the properties that you list. If you remove a property from the configuration, the provider sets it back to the server default. When you destroy the resource, the provider sets all listed properties back to their defaults, unless restore_on_destroy = false. Examples of connectors are account.lock.handler, account.disable.handler, self-sign-up, lite-user-sign-up, user-email-verification, account-recovery, admin-forced-password-reset, passwordHistory, passwordExpiry, multiattribute.login.handler, sso.login.recaptcha, suspension.notification, pii-controller, user-claim-update and organization-self-service. MFA connectors include email-otp-authenticator, sms-otp-authenticator, totp, backup-code-authenticator and FIDOAuthenticator. To see a connector's properties, use the wso2is_governance_connector data source. To import, use the connector name.
+        name: wso2is_governance_connector
+        title: wso2is_governance_connector Resource - wso2is
+        examples:
+            - name: account_lock
+              manifest: |-
+                {
+                  "name": "account.lock.handler",
+                  "properties": {
+                    "account.lock.handler.On.Failure.Max.Attempts": "5",
+                    "account.lock.handler.Time": "15",
+                    "account.lock.handler.lock.on.max.failed.attempts.enable": "true"
+                  }
+                }
+            - name: self_sign_up
+              manifest: |-
+                {
+                  "name": "self-sign-up",
+                  "properties": {
+                    "SelfRegistration.Enable": "true",
+                    "SelfRegistration.LockOnCreation": "true"
+                  }
+                }
+        argumentDocs:
+            category_id: (String) Category the connector belongs to.
+            id: (String) Connector ID.
+            name: (String) Connector name, for example account.lock.handler.
+            properties: (Map of String) Property values by property name, for example { "account.lock.handler.lock.on.max.failed.attempts.enable" = "true" }. Values are strings.
+            restore_on_destroy: (Boolean) Revert the managed properties to the server defaults when the resource is destroyed. The default is true.
+        importStatements:
+            - terraform import wso2is_governance_connector.account_lock account.lock.handler
+    wso2is_group:
+        subCategory: ""
+        description: Manages a group of users. Manage the members with wso2is_group_members, and the roles with wso2is_role_assignment. By default, the server requires group names to be 3 to 30 characters long, without spaces. To import a group, use its ID.
+        name: wso2is_group
+        title: wso2is_group Resource - wso2is
+        examples:
+            - name: developers
+              manifest: |-
+                {
+                  "name": "developers"
+                }
+        argumentDocs:
+            id: (String) Group ID.
+            name: (String) Group name, without the user store prefix.
+            user_store: (String) User store domain. The default is PRIMARY. Changing it replaces the group.
+        importStatements:
+            - terraform import wso2is_group.developers <group_id>
+    wso2is_group_members:
+        subCategory: ""
+        description: Manages the complete list of members of a group. The provider removes any user who is not in the list. Use only one wso2is_group_members for each group. To import, use the group ID.
+        name: wso2is_group_members
+        title: wso2is_group_members Resource - wso2is
+        examples:
+            - name: developers
+              manifest: |-
+                {
+                  "group_id": "${wso2is_group.developers.id}",
+                  "user_ids": [
+                    "${wso2is_user.alice.id}"
+                  ]
+                }
+              references:
+                group_id: wso2is_group.developers.id
+                user_ids: wso2is_user.alice.id
+              dependencies:
+                wso2is_group.developers: |-
+                    {
+                      "name": "developers"
+                    }
+                wso2is_user.alice: |-
+                    {
+                      "email": "alice@example.com",
+                      "password": "${var.alice_password}",
+                      "username": "alice"
+                    }
+        argumentDocs:
+            group_id: (String) Group ID.
+            id: (String) Same as group_id.
+            user_ids: (Set of String) IDs of the member users.
+        importStatements:
+            - terraform import wso2is_group_members.developers <group_id>
+    wso2is_identity_provider:
+        subCategory: ""
+        description: Manages an identity provider, which the Console calls a connection. An identity provider lets users sign in with another system. Examples are social logins (Google, GitHub, Facebook, Microsoft and Apple) and any OpenID Connect or SAML provider. The resource also manages claim and role mappings, just-in-time provisioning and outbound provisioning. Authenticator and connector settings are properties with the names that the server uses. The wso2is_federated_authenticator_metadata data source lists them. The provider only manages the property keys that you set. Put secrets in secret_properties, so that plans hide them. To use the identity provider for login, add it to an application's authentication_sequence. To import, use the identity provider's ID.
+        name: wso2is_identity_provider
+        title: wso2is_identity_provider Resource - wso2is
+        examples:
+            - name: google
+              manifest: |-
+                {
+                  "federated_authenticators": {
+                    "GoogleOIDCAuthenticator": {
+                      "properties": {
+                        "ClientId": "1234.apps.googleusercontent.com",
+                        "callbackUrl": "https://id.example.com/commonauth"
+                      },
+                      "secret_properties": {
+                        "ClientSecret": "${var.google_client_secret}"
+                      }
+                    }
+                  },
+                  "jit_provisioning": {
+                    "enabled": true,
+                    "scheme": "PROVISION_SILENTLY"
+                  },
+                  "name": "Google",
+                  "template_id": "google-idp"
+                }
+            - name: corporate
+              manifest: |-
+                {
+                  "claims": {
+                    "mappings": [
+                      {
+                        "idp_claim": "email",
+                        "local_claim": "http://wso2.org/claims/emailaddress"
+                      }
+                    ],
+                    "user_id_claim": "email"
+                  },
+                  "federated_authenticators": {
+                    "OpenIDConnectAuthenticator": {
+                      "properties": {
+                        "ClientId": "wso2is",
+                        "OAuth2AuthzEPUrl": "https://sso.corp.example/authorize",
+                        "OAuth2TokenEPUrl": "https://sso.corp.example/token",
+                        "Scopes": "openid email profile",
+                        "UserInfoUrl": "https://sso.corp.example/userinfo",
+                        "callbackUrl": "https://id.example.com/commonauth"
+                      },
+                      "secret_properties": {
+                        "ClientSecret": "${var.corporate_client_secret}"
+                      }
+                    }
+                  },
+                  "jwks_uri": "https://sso.corp.example/jwks",
+                  "name": "Corporate SSO",
+                  "role_mappings": [
+                    {
+                      "idp_role": "admins",
+                      "local_role": "Internal/admin"
+                    }
+                  ]
+                }
+        argumentDocs:
+            account_lookup_attribute_mappings: (Attributes List) Local and federated attributes used to find an existing local user. (see below for nested schema)
+            alias: (String) Alias used as the audience of tokens this provider issues (for example the token endpoint of the resident IdP).
+            associate_local_user: (Boolean) Link to an existing local user found through the lookup attributes. The default is false.
+            attribute_sync_method: (String) OVERRIDE_ALL, PRESERVE_LOCAL or NONE. The default is OVERRIDE_ALL.
+            authentication_properties: '(Map of String, Sensitive) Credentials: username/password (BASIC), accessToken (BEARER) or header/value (API_KEY). The server never returns this value.'
+            authentication_type: (String) NONE, BASIC, BEARER or API_KEY.
+            blocking_enabled: (Boolean) Provision synchronously.
+            certificates: (List of String) PEM certificates of the provider (for validating signed responses and tokens). Conflicts with jwks_uri.
+            claim: (String) Claim URI.
+            claims: (Attributes) Claim mappings from the provider's attributes to local claims. (see below for nested schema)
+            default_authenticator: (String) Name of the federated authenticator used by default. The default is the only (or first) configured authenticator.
+            default_outbound_connector: (String) Name of the default outbound provisioning connector.
+            default_value: (String) Default value.
+            description: (String) Description.
+            enabled: (Boolean) Whether the connection can be used. The default is true.
+            endpoint: (Attributes) External service endpoint of a custom (user defined) federated authenticator. (see below for nested schema)
+            federated_attribute: (String) Provider claim.
+            federated_authenticators: '(Attributes Map) Federated authenticators, keyed by authenticator name: GoogleOIDCAuthenticator, GithubAuthenticator, FacebookAuthenticator, MicrosoftWindowsLiveAuthenticator, Office365Authenticator, AppleOIDCAuthenticator, TwitterAuthenticator, OpenIDConnectAuthenticator, SAMLSSOAuthenticator, PassiveSTSAuthenticator, IWAKerberosAuthenticator, EmailOTP, SMSOTP, or a custom authenticator. (see below for nested schema)'
+            force_delete: (Boolean) Delete the connection even when applications still use it. The default is false.
+            groups: (Set of String) Groups defined at the provider that can be mapped to local roles.
+            home_realm_identifier: (String) Home realm identifier (fidp request parameter value) that selects this provider.
+            id: (String) Identity provider ID.
+            idp_claim: (String) Claim name used by the provider.
+            idp_group_sync_method: (String) MERGE_WITH_EXISTING or OVERRIDE_ALL. The default is MERGE_WITH_EXISTING.
+            idp_issuer_name: (String) Issuer of tokens from this provider, when different from its name (used to validate JWT bearer grants).
+            idp_role: (String) Role name sent by the provider.
+            image_url: (String) Logo URL.
+            implicit_association: (Attributes) Associate federated users with local users that have matching attributes. (see below for nested schema)
+            is_federation_hub: (Boolean) The provider is a federation hub (it fronts other providers). The default is false.
+            is_primary: (Boolean) Use as the primary (default) identity provider. The default is false.
+            jit_provisioning: (Attributes) Just-in-time provisioning of local accounts for federated users. (see below for nested schema)
+            jwks_uri: (String) JWKS endpoint used to validate tokens signed by the provider. Conflicts with certificates.
+            local_attribute: (String) Local claim URI.
+            local_claim: (String) Local claim URI.
+            local_role: (String) Local role, as Internal/<role name> for organization roles (WSO2 silently ignores other formats).
+            lookup_attributes: (List of String) Local claim URIs used to find the local user.
+            mappings: (Attributes Set) Provider claim to local claim mappings. Without mappings the provider's claims are used as is. (see below for nested schema)
+            name: (String) Unique name, used in authentication steps.
+            outbound_provisioning_connectors: '(Attributes Map) Outbound provisioning connectors keyed by name: SCIM2, scim, googleapps, salesforce. (see below for nested schema)'
+            outbound_provisioning_roles: (Set of String) Only users with these roles are provisioned to this provider.
+            properties: (Map of String) Authenticator properties, for example ClientId, callbackUrl, Scopes, OAuth2AuthzEPUrl, OAuth2TokenEPUrl, UserInfoUrl (OIDC) or IdPEntityId, SSOUrl, SPEntityId (SAML).
+            provisioning_claims: (Attributes Set) Default values of claims for outbound provisioning. (see below for nested schema)
+            role_claim: (String) Provider claim that carries roles.
+            role_mappings: (Attributes Set) Provider role to local role mappings. (see below for nested schema)
+            rules_enabled: (Boolean) Apply provisioning rules.
+            scheme: (String) PROVISION_SILENTLY, PROMPT_CONSENT, PROMPT_PASSWORD_CONSENT or PROMPT_USERNAME_PASSWORD_CONSENT. The default is PROVISION_SILENTLY.
+            secret_properties: (Map of String, Sensitive) Confidential properties, for example ClientSecret.
+            skip_jit_for_lookup_failure: (Boolean) Skip provisioning when the local user lookup fails. The default is false.
+            template_id: (String) The Console template, for example google-idp, github-idp, enterprise-oidc-idp or enterprise-saml-idp. The template only changes how the Console shows the connection. The server only accepts it at creation, so changing it replaces the connection.
+            uri: (String) HTTPS endpoint.
+            user_id_claim: (String) The identity provider's claim that identifies the user. When it is empty, the server uses the subject.
+            user_store: (String) User store for provisioned users. The default is PRIMARY.
+        importStatements:
+            - terraform import wso2is_identity_provider.google <identity_provider_id>
+    wso2is_identity_verification_provider:
+        subCategory: ""
+        description: Manages an identity verification provider, such as Onfido. The server uses it to check users' identity documents. To import, use the provider's ID.
+        name: wso2is_identity_verification_provider
+        title: wso2is_identity_verification_provider Resource - wso2is
+        examples:
+            - name: onfido
+              manifest: |-
+                {
+                  "claim_mappings": {
+                    "http://wso2.org/claims/givenname": "first_name",
+                    "http://wso2.org/claims/lastname": "last_name"
+                  },
+                  "name": "Onfido",
+                  "properties": {
+                    "base_url": "https://api.eu.onfido.com/v3.6",
+                    "workflow_id": "f0b8..."
+                  },
+                  "secret_properties": {
+                    "token": "${var.onfido_token}",
+                    "webhook_token": "${var.onfido_webhook_token}"
+                  },
+                  "type": "ONFIDO"
+                }
+        argumentDocs:
+            claim_mappings: (Map of String) Provider claim by local claim URI, for example { "http://wso2.org/claims/givenname" = "first_name" }.
+            description: (String) Description.
+            enabled: (Boolean) Whether the provider is enabled. The default is true.
+            id: (String) Provider ID.
+            image_url: (String) Logo URL. The server sets a default for known types.
+            name: (String) Provider name.
+            properties: (Map of String) Configuration properties, for example base_url and workflow_id for Onfido.
+            secret_properties: (Map of String, Sensitive) Confidential configuration properties, for example token and webhook_token for Onfido.
+            type: (String) Provider type, for example ONFIDO (the connector must be installed). Changing it replaces the provider.
+        importStatements:
+            - terraform import wso2is_identity_verification_provider.onfido <provider_id>
+    wso2is_impersonation_configuration:
+        subCategory: ""
+        description: Manages the user impersonation settings. The resource only changes the settings that you set. Other settings keep their current values. When you destroy this resource, the provider restores the server defaults. Each tenant (or organization) has one set of these settings. To import them, use the ID impersonation_configuration.
+        name: wso2is_impersonation_configuration
+        title: wso2is_impersonation_configuration Resource - wso2is
+        examples:
+            - name: this
+              manifest: |-
+                {
+                  "enable_email_notification": true
+                }
+        argumentDocs:
+            enable_email_notification: (Boolean) Email users when they are impersonated.
+            id: (String) Always impersonation_configuration.
+        importStatements:
+            - terraform import wso2is_impersonation_configuration.this impersonation_configuration
+    wso2is_inbound_provisioning_configuration:
+        subCategory: ""
+        description: Manages inbound SCIM provisioning for requests that sign in with basic authentication (the resident service provider). Requests that use an application's OAuth2 token follow that application's own provisioning settings instead. The resource only changes the settings that you set. Other settings keep their current values. When you destroy this resource, the provider restores the server defaults. Each tenant (or organization) has one set of these settings. To import them, use the ID inbound_provisioning_configuration.
+        name: wso2is_inbound_provisioning_configuration
+        title: wso2is_inbound_provisioning_configuration Resource - wso2is
+        examples:
+            - name: this
+              manifest: |-
+                {
+                  "provisioning_userstore": "CUSTOMERS"
+                }
+        argumentDocs:
+            id: (String) Always inbound_provisioning_configuration.
+            provisioning_userstore: (String) The user store that receives every user created through /scim2. The default, "", lets the DOMAIN/ prefix of each username choose the user store. When you set a user store, the server ignores the user store of new users, including
+            proxy_mode: (Boolean) Forward SCIM provisioning requests to outbound connectors without storing users locally.
+            wso2is_user.user_store: . It also refuses SCIM updates of users in other user stores.
+        importStatements:
+            - terraform import wso2is_inbound_provisioning_configuration.this inbound_provisioning_configuration
+    wso2is_jwt_key_validator_configuration:
+        subCategory: ""
+        description: Manages how the server checks JWTs that clients use as client assertions (private_key_jwt). The resource only changes the settings that you set. Other settings keep their current values. When you destroy this resource, the settings keep their current values, and Terraform stops managing them. Each tenant (or organization) has one set of these settings. To import them, use the ID jwt_key_validator_configuration.
+        name: wso2is_jwt_key_validator_configuration
+        title: wso2is_jwt_key_validator_configuration Resource - wso2is
+        examples:
+            - name: this
+              manifest: |-
+                {
+                  "enable_token_reuse": false
+                }
+        argumentDocs:
+            enable_token_reuse: (Boolean) Allow a client assertion JWT (same jti) to be used more than once.
+            id: (String) Always jwt_key_validator_configuration.
+        importStatements:
+            - terraform import wso2is_jwt_key_validator_configuration.this jwt_key_validator_configuration
+    wso2is_notification_template:
+        subCategory: ""
+        description: Customizes an email or SMS notification template in one language (locale). The template applies to the whole organization or to one application. When you destroy the resource, the server goes back to the system template. Templates use placeholders, such as {{user-name}}, {{confirmation-code}}, {{organization-name}} and {{ url:...}}. Template types include AccountConfirmation, AskPassword, PasswordReset, passwordResetSucess, ResendAccountConfirmation, EmailOTP, SMSOTP, AccountLockFailedAttempt, AccountUnlockAdmin, AccountDisable, OrganizationUserInvitation, magicLink and TemporaryPassword. You can also use your own types from wso2is_notification_template_type. To import, use the ID
+        name: wso2is_notification_template
+        title: wso2is_notification_template Resource - wso2is
+        examples:
+            - name: account_confirmation_fr
+              manifest: |-
+                {
+                  "body": "\u003cp\u003eBonjour {{user-name}}, confirmez votre compte : \u003ca href=\"{{carbon.product-url}}/accountrecoveryendpoint/confirmregistration.do?confirmation={{confirmation-code}}\"\u003econfirmer\u003c/a\u003e\u003c/p\u003e",
+                  "channel": "email",
+                  "locale": "fr_FR",
+                  "subject": "Confirmez votre compte",
+                  "type": "AccountConfirmation"
+                }
+            - name: sms_otp
+              manifest: |-
+                {
+                  "body": "Your Acme code is {{confirmation-code}}",
+                  "channel": "sms",
+                  "type": "SMSOTP"
+                }
+        argumentDocs:
+            application_id: (String) The ID of the application that this template is for. When it is not set, the template is the organization's template.
+            body: (String) Message body (HTML for email).
+            channel: (String) email or sms.
+            content_type: (String) Email content type. The default is text/html.
+            footer: (String) Email footer.
+            id: (String) <channel>/<type>/<locale>[/<application_id>].
+            locale: (String) Locale such as en_US or fr_FR. The default is en_US.
+            subject: (String) Email subject (email templates).
+            type: (String) Template type name, for example AccountConfirmation.
+        importStatements:
+            - terraform import wso2is_notification_template.account_confirmation_fr email/AccountConfirmation/fr_FR
+    wso2is_notification_template_type:
+        subCategory: ""
+        description: Creates a custom notification template type. Use a custom type for notifications that your own flows or adaptive scripts send. Deleting the type also deletes its templates. To import, use the ID
+        name: wso2is_notification_template_type
+        title: wso2is_notification_template_type Resource - wso2is
+        examples:
+            - name: contract_ready
+              manifest: |-
+                {
+                  "channel": "email",
+                  "name": "ContractReady"
+                }
+              dependencies:
+                wso2is_notification_template.contract_ready: |-
+                    {
+                      "body": "\u003cp\u003eHi {{user-name}}, your contract is ready to sign.\u003c/p\u003e",
+                      "channel": "email",
+                      "subject": "Your contract is ready",
+                      "type": "${wso2is_notification_template_type.contract_ready.name}"
+                    }
+        argumentDocs:
+            channel: (String) email or sms.
+            id: (String) <channel>/<name>.
+            name: (String) Template type name.
+        importStatements:
+            - terraform import wso2is_notification_template_type.contract_ready email/ContractReady
+    wso2is_oauth2_configuration:
+        subCategory: ""
+        description: Manages the tenant-wide OAuth2 settings. The resource only changes the settings that you set. Other settings keep their current values. When you destroy this resource, the provider restores the server defaults. Each tenant (or organization) has one set of these settings. To import them, use the ID oauth2_configuration.
+        name: wso2is_oauth2_configuration
+        title: wso2is_oauth2_configuration Resource - wso2is
+        examples:
+            - name: this
+              manifest: |-
+                {
+                  "enable_jwt_scope_as_array": true
+                }
+        argumentDocs:
+            enable_jwt_scope_as_array: (Boolean) Send the scope claim of JWT access tokens as an array (applications can override it).
+            id: (String) Always oauth2_configuration.
+        importStatements:
+            - terraform import wso2is_oauth2_configuration.this oauth2_configuration
+    wso2is_oauth2_issuer_usage_scope:
+        subCategory: ""
+        description: Manages which organizations may use the root organization's token issuer. The resource only changes the settings that you set. Other settings keep their current values. When you destroy this resource, the settings keep their current values, and Terraform stops managing them. Each tenant (or organization) has one set of these settings. To import them, use the ID oauth2_issuer_usage_scope.
+        name: wso2is_oauth2_issuer_usage_scope
+        title: wso2is_oauth2_issuer_usage_scope Resource - wso2is
+        examples:
+            - name: this
+              manifest: |-
+                {
+                  "usage_scope": "ALL_EXISTING_AND_FUTURE_ORGS"
+                }
+        argumentDocs:
+            id: (String) Always oauth2_issuer_usage_scope.
+            usage_scope: (String) ALL_EXISTING_AND_FUTURE_ORGS or NONE.
+        importStatements:
+            - terraform import wso2is_oauth2_issuer_usage_scope.this oauth2_issuer_usage_scope
+    wso2is_oidc_scope:
+        subCategory: ""
+        description: Manages an OpenID Connect scope. When an application requests the scope, the server returns the scope's OIDC claims in ID tokens and from the /userinfo endpoint. The claims must exist in the http://wso2.org/oidc/claim dialect. You can also import and change the built-in scopes, such as openid, profile, email, phone and address. To import, use the scope name.
+        name: wso2is_oidc_scope
+        title: wso2is_oidc_scope Resource - wso2is
+        examples:
+            - name: contact
+              manifest: |-
+                {
+                  "claims": [
+                    "email",
+                    "phone_number"
+                  ],
+                  "description": "Email address and phone number",
+                  "display_name": "Contact details",
+                  "name": "contact"
+                }
+              dependencies:
+                wso2is_external_claim.department: |-
+                    {
+                      "claim_uri": "department",
+                      "dialect_uri": "http://wso2.org/oidc/claim",
+                      "mapped_local_claim_uri": "http://wso2.org/claims/department"
+                    }
+            - name: employment
+              manifest: |-
+                {
+                  "claims": [
+                    "${wso2is_external_claim.department.claim_uri}"
+                  ],
+                  "display_name": "Employment details",
+                  "name": "employment"
+                }
+              references:
+                claims: wso2is_external_claim.department.claim_uri
+              dependencies:
+                wso2is_external_claim.department: |-
+                    {
+                      "claim_uri": "department",
+                      "dialect_uri": "http://wso2.org/oidc/claim",
+                      "mapped_local_claim_uri": "http://wso2.org/claims/department"
+                    }
+        argumentDocs:
+            claims: (Set of String) OIDC claim names, for example email, given_name, or custom ones mapped with wso2is_external_claim.
+            description: (String) Description.
+            display_name: (String) Display name shown on consent pages.
+            id: (String) Scope name.
+            name: (String) Scope name. Changing it replaces the scope.
+        importStatements:
+            - terraform import wso2is_oidc_scope.employee employee
+    wso2is_organization:
+        subCategory: ""
+        description: Manages a sub-organization (a B2B organization). The organization sits under the root organization or under another sub-organization. Share applications with it with wso2is_application_share. To manage objects inside it, add a provider block with an alias that sets organization_id. The server only deletes an organization after its child organizations. To import, use the organization ID.
+        name: wso2is_organization
+        title: wso2is_organization Resource - wso2is
+        examples:
+            - name: partner
+              manifest: |-
+                {
+                  "attributes": {
+                    "region": "eu-west"
+                  },
+                  "description": "Reseller",
+                  "name": "Partner Inc"
+                }
+              dependencies:
+                wso2is_application.b2b_admin: |-
+                    {
+                      "name": "Partner administration",
+                      "oidc": {
+                        "grant_types": [
+                          "client_credentials",
+                          "organization_switch"
+                        ]
+                      }
+                    }
+                wso2is_application_authorized_api.org_groups: |-
+                    {
+                      "api_resource_id": "${data.wso2is_api_resource.org_groups.id}",
+                      "application_id": "${wso2is_application.b2b_admin.id}",
+                      "scopes": "${data.wso2is_api_resource.org_groups.scope_names}"
+                    }
+                wso2is_application_share.b2b_admin: |-
+                    {
+                      "application_id": "${wso2is_application.b2b_admin.id}",
+                      "depends_on": [
+                        "${wso2is_application_authorized_api.org_groups}"
+                      ],
+                      "organization_ids": [
+                        "${wso2is_organization.partner.id}"
+                      ]
+                    }
+                wso2is_group.partner_admins: |-
+                    {
+                      "name": "partner-admins",
+                      "provider": "${wso2is.partner}"
+                    }
+        argumentDocs:
+            attributes: (Map of String) Custom organization attributes.
+            description: (String) Description.
+            enabled: (Boolean) Whether the organization is active. The default is true.
+            handle: (String) Organization handle (used in URLs, WSO2 IS 7.1+). The default is the server's choice (the ID). The server only accepts this value at creation.
+            id: (String) Organization ID.
+            name: (String) Organization name.
+            parent_id: (String) The ID of the parent organization, which is the organization that the provider manages. WSO2 only creates an organization from its parent. To create a nested organization, use a provider alias whose organization_id is the parent.
+            type: (String) TENANT (default) or STRUCTURAL. The server only accepts this value at creation.
+            version: (String) Organization version.
+        importStatements:
+            - terraform import wso2is_organization.partner <organization_id>
+    wso2is_organization_discovery:
+        subCategory: ""
+        description: Sets the email domains of a sub-organization's users, for email domain discovery. The login page then sends users with these domains to the organization. Turn on email domain discovery first with wso2is_organization_discovery_configuration, or the server answers ORG-60080. Add depends_on for that resource, so that Terraform also removes the domains before it turns discovery off. Manage this resource from the root organization. To import, use the organization ID.
+        name: wso2is_organization_discovery
+        title: wso2is_organization_discovery Resource - wso2is
+        examples:
+            - name: partner
+              manifest: |-
+                {
+                  "depends_on": [
+                    "${wso2is_organization_discovery_configuration.this}"
+                  ],
+                  "email_domains": [
+                    "partner.example",
+                    "partner-eu.example"
+                  ],
+                  "organization_id": "${wso2is_organization.partner.id}"
+                }
+              references:
+                organization_id: wso2is_organization.partner.id
+              dependencies:
+                wso2is_organization.partner: |-
+                    {
+                      "name": "Partner Inc"
+                    }
+                wso2is_organization_discovery_configuration.this: |-
+                    {
+                      "email_domain_enabled": true
+                    }
+        argumentDocs:
+            email_domains: (Set of String) Email domains of the organization's users, for example partner.example. A domain can belong to one organization only.
+            id: (String) Same as organization_id.
+            organization_id: (String) Sub-organization ID.
+        importStatements:
+            - terraform import wso2is_organization_discovery.partner <organization_id>
+    wso2is_organization_discovery_configuration:
+        subCategory: ""
+        description: Turns on organization discovery for the root organization. With discovery on, the login page sends users to their organization's login, based on the domain of their email address. Set each organization's domains with wso2is_organization_discovery. Each tenant has one configuration. When you destroy the resource, the provider removes the configuration, which turns discovery off. To import, use the ID organization_discovery_configuration.
+        name: wso2is_organization_discovery_configuration
+        title: wso2is_organization_discovery_configuration Resource - wso2is
+        examples:
+            - name: this
+              manifest: |-
+                {
+                  "email_domain_based_self_sign_up_enabled": true,
+                  "email_domain_enabled": true
+                }
+        argumentDocs:
+            default_param: (String) What users type when they choose their organization on the login page, either orgHandle or orgName. When it is not set, the server uses its default.
+            email_domain_based_self_sign_up_enabled: (Boolean) Let users self-register in the organization that owns their email domain. The default is false.
+            email_domain_enabled: (Boolean) Discover the organization from the user's email domain.
+            id: (String) Always organization_discovery_configuration.
+        importStatements:
+            - terraform import wso2is_organization_discovery_configuration.this organization_discovery_configuration
+    wso2is_passive_sts_configuration:
+        subCategory: ""
+        description: Manages the WS-Federation (passive STS) endpoint. The resource only changes the settings that you set. Other settings keep their current values. When you destroy this resource, the provider restores the server defaults. Each tenant (or organization) has one set of these settings. To import them, use the ID passive_sts_configuration.
+        name: wso2is_passive_sts_configuration
+        title: wso2is_passive_sts_configuration Resource - wso2is
+        examples:
+            - name: this
+              manifest: |-
+                {
+                  "enable_request_signing": true
+                }
+        argumentDocs:
+            enable_request_signing: (Boolean) Sign authentication requests.
+            id: (String) Always passive_sts_configuration.
+        importStatements:
+            - terraform import wso2is_passive_sts_configuration.this passive_sts_configuration
+    wso2is_push_sender:
+        subCategory: ""
+        description: Manages a push notification provider. In the Console, this is Notification Channels > Push Providers. The push notification authenticator uses it. WSO2 IS 7.3 supports Firebase Cloud Messaging and Amazon SNS, with one of each per tenant. The server returns the credentials in its API responses, so the credentials appear in the Terraform state. To import, use the ID FCM_PushPublisher or AmazonSNS_PushPublisher.
+        name: wso2is_push_sender
+        title: wso2is_push_sender Resource - wso2is
+        examples:
+            - name: fcm
+              manifest: |-
+                {
+                  "default": true,
+                  "fcm": {
+                    "service_account_json": "${var.firebase_service_account_json}"
+                  },
+                  "provider_name": "FCM"
+                }
+            - name: sns
+              manifest: |-
+                {
+                  "amazon_sns": {
+                    "access_key_id": "${var.aws_access_key_id}",
+                    "platform_arns": {
+                      "APNS": "arn:aws:sns:eu-west-1:123456789012:app/APNS/acme-authenticator",
+                      "FCM": "arn:aws:sns:eu-west-1:123456789012:app/GCM/acme-authenticator"
+                    },
+                    "region": "eu-west-1",
+                    "secret_access_key": "${var.aws_secret_access_key}"
+                  },
+                  "provider_name": "AmazonSNS"
+                }
+        argumentDocs:
+            access_key_id: (String) Access key ID of an IAM user allowed to manage SNS platform endpoints and publish.
+            amazon_sns: (Attributes) Amazon SNS settings (with provider_name = "AmazonSNS"). (see below for nested schema)
+            default: (Boolean) Use this provider for devices that do not name one when they register. The default is false.
+            fcm: (Attributes) Firebase Cloud Messaging settings (with provider_name = "FCM"). (see below for nested schema)
+            id: '(String) Sender name: <provider_name>_PushPublisher.'
+            platform_arns: (Map of String) Platform application ARN by platform, for example { FCM = "arn:aws:sns:...:app/GCM/my-app", APNS = "..." }.
+            provider_name: (String) FCM or AmazonSNS. Changing it replaces the sender.
+            region: (String) AWS region, for example eu-west-1.
+            secret_access_key: (String, Sensitive) Secret access key.
+            service_account_json: (String, Sensitive) Content of the Firebase service account key file (JSON), for example file("service-account.json").
+        importStatements:
+            - terraform import wso2is_push_sender.fcm FCM_PushPublisher
+    wso2is_remote_logging:
+        subCategory: ""
+        description: Sends server logs (audit logs or carbon logs) to a remote HTTP endpoint. This resource only works in the super tenant. When you destroy the resource, the server stops sending the logs. To import, use the log type.
+        name: wso2is_remote_logging
+        title: wso2is_remote_logging Resource - wso2is
+        examples:
+            - name: audit
+              manifest: |-
+                {
+                  "connect_timeout_millis": "5000",
+                  "log_type": "AUDIT",
+                  "password": "${var.log_password}",
+                  "remote_url": "https://logs.example.com/wso2is/audit",
+                  "username": "wso2is"
+                }
+              references:
+                password: var.log_password
+        argumentDocs:
+            connect_timeout_millis: (String) Connection timeout in milliseconds.
+            id: (String) Same as log_type.
+            keystore_location: (String) Path, on the server, of a keystore with a client certificate.
+            keystore_password: (String, Sensitive) Keystore password (write-only on the server).
+            log_type: (String) AUDIT or CARBON.
+            password: (String, Sensitive) Basic authentication password (write-only on the server).
+            remote_url: (String) Endpoint the logs are posted to.
+            truststore_location: (String) Path, on the server, of a truststore for the endpoint's certificate.
+            truststore_password: (String, Sensitive) Truststore password (write-only on the server).
+            username: (String) Basic authentication username.
+            verify_hostname: (Boolean) Verify the endpoint's hostname. The default is true.
+        importStatements:
+            - terraform import wso2is_remote_logging.audit AUDIT
+    wso2is_role:
+        subCategory: ""
+        description: Manages a role and the API scopes (permissions) that it grants. A role belongs either to the organization or to one application. An application can only have its own roles when it sets associated_roles.allowed_audience = "APPLICATION". Assign users and groups to the role with wso2is_role_assignment. To import a role, use its ID.
+        name: wso2is_role
+        title: wso2is_role Resource - wso2is
+        examples:
+            - name: order_admins
+              manifest: |-
+                {
+                  "depends_on": [
+                    "${wso2is_api_resource.orders}"
+                  ],
+                  "name": "order-admins",
+                  "permissions": [
+                    "orders:read",
+                    "orders:write"
+                  ]
+                }
+              dependencies:
+                wso2is_api_resource.orders: |-
+                    {
+                      "identifier": "https://api.example.com/orders",
+                      "name": "Orders API",
+                      "scopes": [
+                        {
+                          "display_name": "Read orders",
+                          "name": "orders:read"
+                        },
+                        {
+                          "display_name": "Change orders",
+                          "name": "orders:write"
+                        }
+                      ]
+                    }
+                wso2is_application.orders_ui: |-
+                    {
+                      "associated_roles": {
+                        "allowed_audience": "APPLICATION"
+                      },
+                      "name": "Orders UI",
+                      "oidc": {
+                        "callback_urls": [
+                          "https://orders.example.com/callback"
+                        ],
+                        "grant_types": [
+                          "authorization_code"
+                        ]
+                      }
+                    }
+                wso2is_application_authorized_api.orders_ui: |-
+                    {
+                      "api_resource_id": "${wso2is_api_resource.orders.id}",
+                      "application_id": "${wso2is_application.orders_ui.id}",
+                      "scopes": [
+                        "orders:read"
+                      ]
+                    }
+            - name: order_viewer
+              manifest: |-
+                {
+                  "audience_id": "${wso2is_application.orders_ui.id}",
+                  "audience_type": "application",
+                  "depends_on": [
+                    "${wso2is_application_authorized_api.orders_ui}"
+                  ],
+                  "name": "viewer",
+                  "permissions": [
+                    "orders:read"
+                  ]
+                }
+              references:
+                audience_id: wso2is_application.orders_ui.id
+              dependencies:
+                wso2is_api_resource.orders: |-
+                    {
+                      "identifier": "https://api.example.com/orders",
+                      "name": "Orders API",
+                      "scopes": [
+                        {
+                          "display_name": "Read orders",
+                          "name": "orders:read"
+                        },
+                        {
+                          "display_name": "Change orders",
+                          "name": "orders:write"
+                        }
+                      ]
+                    }
+                wso2is_application.orders_ui: |-
+                    {
+                      "associated_roles": {
+                        "allowed_audience": "APPLICATION"
+                      },
+                      "name": "Orders UI",
+                      "oidc": {
+                        "callback_urls": [
+                          "https://orders.example.com/callback"
+                        ],
+                        "grant_types": [
+                          "authorization_code"
+                        ]
+                      }
+                    }
+                wso2is_application_authorized_api.orders_ui: |-
+                    {
+                      "api_resource_id": "${wso2is_api_resource.orders.id}",
+                      "application_id": "${wso2is_application.orders_ui.id}",
+                      "scopes": [
+                        "orders:read"
+                      ]
+                    }
+        argumentDocs:
+            audience_id: (String) Application ID for application roles. For organization roles it is computed (the organization ID). Changing it replaces the role.
+            audience_name: (String) Name of the organization or application the role belongs to.
+            audience_type: (String) organization (default) or application. Changing it replaces the role.
+            id: (String) Role ID.
+            name: (String) Role name, unique within its audience.
+            permissions: (Set of String) Scope names granted by the role. For application roles they must belong to APIs the application is authorized for.
+            shared: (Boolean) Whether the role is shared from a parent organization.
+        importStatements:
+            - terraform import wso2is_role.order_admins <role_id>
+    wso2is_role_assignment:
+        subCategory: ""
+        description: Manages the complete list of users and groups that have a role. The provider removes any assignment that is not in the list. Use only one wso2is_role_assignment for each role. Every user also has the built-in everyone role, which this resource does not manage. To import, use the role ID.
+        name: wso2is_role_assignment
+        title: wso2is_role_assignment Resource - wso2is
+        examples:
+            - name: support
+              manifest: |-
+                {
+                  "group_ids": [
+                    "${wso2is_group.support.id}"
+                  ],
+                  "role_id": "${wso2is_role.support.id}"
+                }
+              references:
+                group_ids: wso2is_group.support.id
+                role_id: wso2is_role.support.id
+              dependencies:
+                wso2is_group.support: |-
+                    {
+                      "name": "support"
+                    }
+                wso2is_role.support: |-
+                    {
+                      "name": "support"
+                    }
+        argumentDocs:
+            group_ids: (Set of String) IDs of groups assigned the role.
+            id: (String) Same as role_id.
+            role_id: (String) Role ID.
+            user_ids: (Set of String) IDs of users assigned the role.
+        importStatements:
+            - terraform import wso2is_role_assignment.support <role_id>
+    wso2is_saml_idp_configuration:
+        subCategory: ""
+        description: Manages the server's settings as a SAML identity provider, such as its metadata and destination URLs. The resource only changes the settings that you set. Other settings keep their current values. When you destroy this resource, the provider restores the server defaults. Each tenant (or organization) has one set of these settings. To import them, use the ID saml_idp_configuration.
+        name: wso2is_saml_idp_configuration
+        title: wso2is_saml_idp_configuration Resource - wso2is
+        examples:
+            - name: this
+              manifest: |-
+                {
+                  "enable_metadata_signing": true,
+                  "metadata_validity_period": 120
+                }
+        argumentDocs:
+            destination_urls: (List of String) SAML SSO endpoint URLs advertised to service providers.
+            enable_metadata_signing: (Boolean) Sign the published metadata.
+            id: (String) Always saml_idp_configuration.
+            metadata_validity_period: (Number) Validity of the published metadata, in minutes.
+        importStatements:
+            - terraform import wso2is_saml_idp_configuration.this saml_idp_configuration
+    wso2is_script_library:
+        subCategory: ""
+        description: Manages a JavaScript library for adaptive authentication scripts. A script loads the library with var lib = require('
+        name: wso2is_script_library
+        title: wso2is_script_library Resource - wso2is
+        examples:
+            - name: risk
+              manifest: |-
+                {
+                  "content": "function isRisky(score) {\n  return score \u003e 70;\n}\nmodule.exports.isRisky = isRisky;\n",
+                  "description": "Risk helpers for adaptive authentication",
+                  "name": "risk.js"
+                }
+        argumentDocs:
+            content: (String) JavaScript source (for example file("libs/risk.js")).
+            description: (String) Description.
+            id: (String) Library name.
+            name: (String) The library name. It must end with .js. Changing the name replaces the library.
+        importStatements:
+            - terraform import wso2is_script_library.risk risk.js
+    wso2is_secret:
+        subCategory: ""
+        description: Stores a secret for adaptive authentication scripts. Scripts read the secret as secrets.
+        name: wso2is_secret
+        title: wso2is_secret Resource - wso2is
+        examples:
+            - name: risk_api_key
+              manifest: |-
+                {
+                  "description": "Used by adaptive scripts as secrets.risk_api_key",
+                  "name": "risk_api_key",
+                  "value_wo": "${var.risk_api_key}",
+                  "value_wo_version": 1
+                }
+              references:
+                value_wo: var.risk_api_key
+        argumentDocs:
+            description: (String) Description.
+            id: (String) <type>/<name>.
+            name: (String) Secret name (letters, digits and underscores). Changing it replaces the secret.
+            secret_id: (String) Server-side secret ID.
+            type: (String) Secret type. The default is ADAPTIVE_AUTH_CALL_CHOREO, the type adaptive scripts read.
+            value: (String, Sensitive) The secret value. Terraform stores it in the state. Use value_wo instead to keep it out of the state.
+            value_wo: (String, Sensitive, Write-only) Write-only secret value (Terraform 1.11+). Change value_wo_version to update it.
+            value_wo_version: (Number) Increase this number to send a new value_wo.
+        importStatements:
+            - terraform import wso2is_secret.risk_api_key ADAPTIVE_AUTH_CALL_CHOREO/risk_api_key
+    wso2is_server_configuration:
+        subCategory: ""
+        description: Manages the tenant-wide session and provisioning settings. In the Console, these settings are under Login & Registration > Session and in the resident identity provider. The resource only changes the settings that you set. Other settings keep their current values. When you destroy this resource, the settings keep their current values, and Terraform stops managing them. Each tenant (or organization) has one set of these settings. To import them, use the ID server_configuration.
+        name: wso2is_server_configuration
+        title: wso2is_server_configuration Resource - wso2is
+        examples:
+            - name: this
+              manifest: |-
+                {
+                  "enable_maximum_session_timeout": true,
+                  "idle_session_timeout": 30,
+                  "maximum_session_timeout": 1440,
+                  "remember_me_period": 10080
+                }
+        argumentDocs:
+            enable_maximum_session_timeout: (Boolean) End sessions after maximum_session_timeout regardless of activity.
+            home_realm_identifiers: (List of String) Home realm identifiers of the resident identity provider.
+            id: (String) Always server_configuration.
+            idle_session_timeout: (Number) Idle session timeout, in minutes.
+            maximum_session_timeout: (Number) Maximum session lifetime, in minutes.
+            preserve_current_session_at_password_update: (Boolean) Keep the current session when the user changes their password (other sessions end).
+            remember_me_period: (Number) How long Remember me keeps users signed in, in minutes.
+        importStatements:
+            - terraform import wso2is_server_configuration.this server_configuration
+    wso2is_sms_sender:
+        subCategory: ""
+        description: Manages the tenant's SMS provider. In the Console, this is Notification Channels > SMS Provider. The server uses it for SMS one-time passwords and SMS notifications. Each tenant has one SMS provider. To import, use the ID SMSPublisher.
+        name: wso2is_sms_sender
+        title: wso2is_sms_sender Resource - wso2is
+        examples:
+            - name: twilio
+              manifest: |-
+                {
+                  "content_type": "FORM",
+                  "key": "ACxxxx",
+                  "provider_name": "Twilio",
+                  "provider_url": "https://api.twilio.com/2010-04-01/Accounts/ACxxxx/Messages.json",
+                  "secret": "${var.twilio_token}",
+                  "sender": "+15550000000"
+                }
+              references:
+                secret: var.twilio_token
+        argumentDocs:
+            authentication_properties: (Map of String, Sensitive) Authentication properties, for example username/password (BASIC), accessToken (BEARER), header/value (API_KEY), clientId/clientSecret/tokenEndpoint/scopes. The server never returns this value.
+            authentication_type: (String) How the server signs in to a custom provider's endpoint. The allowed values are BASIC, CLIENT_CREDENTIAL, BEARER, API_KEY and NONE.
+            content_type: (String) JSON or FORM, the format of requests to the provider.
+            id: (String) Always SMSPublisher.
+            key: (String) Account key or ID (Twilio account SID, Vonage key). With BASIC authentication the server reports the username here.
+            properties: (Map of String) Additional properties, for example body (request template with {{mobile}} and {{body}} placeholders), http.client.method, http.headers.
+            provider_name: (String) Twilio, Vonage, AWSSNS or Custom.
+            provider_url: (String) Provider endpoint (required for Custom).
+            secret: (String, Sensitive) Account secret or token.
+            sender: (String) Sender number or ID.
+        importStatements:
+            - terraform import wso2is_sms_sender.twilio SMSPublisher
+    wso2is_tenant:
+        subCategory: ""
+        description: Manages a tenant (a root organization) and its owner. The provider that creates the tenant must manage the super tenant (tenant_domain = "carbon.super"). It must use basic authentication, with a user who may manage tenants. With an application's client credentials, the server fails to create the tenant (TM-65002, "Error in adding claims to the user"). To manage objects inside the tenant, add another provider block with an alias. Set tenant_domain = wso2is_tenant.
+        name: wso2is_tenant
+        title: wso2is_tenant Resource - wso2is
+        examples:
+            - name: acme
+              manifest: |-
+                {
+                  "domain": "acme.com",
+                  "owner_email": "it@acme.com",
+                  "owner_first_name": "Acme",
+                  "owner_last_name": "Admin",
+                  "owner_password": "${var.acme_admin_password}",
+                  "owner_username": "admin"
+                }
+              references:
+                owner_password: var.acme_admin_password
+              dependencies:
+                wso2is_group.acme_staff: |-
+                    {
+                      "name": "staff",
+                      "provider": "${wso2is.acme}"
+                    }
+        argumentDocs:
+            activated: (Boolean) Whether the tenant is active. Deactivated tenants cannot be used to sign in. The default is true.
+            created_date: (String) Creation time (ISO-8601).
+            domain: (String) Tenant domain, for example acme.com. Changing it replaces the tenant.
+            id: (String) Tenant ID.
+            name: (String) Display name. The default is the domain. The server only accepts this value at creation.
+            owner_email: (String) Email of the tenant owner.
+            owner_first_name: (String) First name of the tenant owner.
+            owner_id: (String) User ID of the tenant owner.
+            owner_last_name: (String) Last name of the tenant owner.
+            owner_password: (String, Sensitive) The tenant owner's password. The server never returns it, so the provider cannot notice changes made outside Terraform.
+            owner_username: (String) Username of the tenant owner (without the domain). Changing it replaces the tenant.
+        importStatements:
+            - terraform import wso2is_tenant.acme acme.com
+    wso2is_user:
+        subCategory: ""
+        description: Manages a user through the SCIM 2.0 API. The provider only manages the attributes in your configuration. It leaves alone the attributes that the user sets in My Account, or that other systems set. The server never sends passwords back. As a result, the provider cannot notice a password that someone changed outside Terraform. Use password_wo (Terraform 1.11 or later) to keep the password out of the state, or ask_password to let the user choose a password. To import a user, use the user's ID.
+        name: wso2is_user
+        title: wso2is_user Resource - wso2is
+        examples:
+            - name: alice
+              manifest: |-
+                {
+                  "attributes": {
+                    "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department": "Engineering",
+                    "urn:scim:wso2:schema:country": "Sri Lanka"
+                  },
+                  "email": "alice@example.com",
+                  "emails": {
+                    "work": "alice@corp.example"
+                  },
+                  "family_name": "Smith",
+                  "given_name": "Alice",
+                  "password_wo": "${var.alice_password}",
+                  "password_wo_version": 1,
+                  "phone_numbers": {
+                    "mobile": "+15551234567"
+                  },
+                  "username": "alice"
+                }
+              references:
+                password_wo: var.alice_password
+            - name: bob
+              manifest: |-
+                {
+                  "ask_password": true,
+                  "email": "bob@example.com",
+                  "username": "bob"
+                }
+        argumentDocs:
+            ask_password: (Boolean) Create the user without a password and email them a link to set one (needs an email address and the Ask Password governance setting). The provider only uses this value when it creates the user.
+            attributes: (Map of String) Other SCIM attributes, by path. Core attributes use their name, such as title, locale or name.middleName. Extension attributes start with their schema URN, for example urn:scim:wso2:schema:country, urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department or urn:scim:schemas:extension:custom:User:<custom claim>. All values are strings. The provider converts booleans and numbers with the server's SCIM schema. Separate the values of a multi-valued attribute with commas.
+            disabled: (Boolean) Whether the account is disabled. This sets urn:scim:wso2:schema:accountDisabled, which needs the account disabling governance connector (account.disable.handler).
+            display_name: (String) Display name.
+            email: (String) Primary email address (http://wso2.org/claims/emailaddress), used for notifications and account recovery.
+            emails: (Map of String) More email addresses, by type (work, home or other). For several verified addresses, use the urn:scim:wso2:schema:emailAddresses attribute instead.
+            family_name: (String) Last name (name.familyName).
+            given_name: (String) First name (name.givenName).
+            id: (String) User ID (SCIM id).
+            locked: (Boolean) Whether the account is locked (urn:scim:wso2:schema:accountLocked). The server also locks the account after failed logins when account locking is on.
+            nick_name: (String) Nickname.
+            password: (String, Sensitive) The user's password. It must meet the tenant's password policy. Terraform stores it in the state. Use password_wo instead to keep it out of the state.
+            password_wo: (String, Sensitive, Write-only) A write-only password (Terraform 1.11 or later). The provider sends it to the server but never stores it in the state. To set a new password, change it and increase password_wo_version.
+            password_wo_version: (Number) Increase this number to send a new password_wo.
+            phone_numbers: '(Map of String) Phone numbers by type: mobile, home, work, other.'
+            user_store: (String) User store domain. The default is PRIMARY. Changing it replaces the user.
+            username: (String) Username, without the user store prefix. Changing it replaces the user (WSO2 does not support renaming).
+        importStatements:
+            - terraform import wso2is_user.alice <user_id>
+    wso2is_user_share:
+        subCategory: ""
+        description: Shares a user of the root organization with sub-organizations (WSO2 IS 7.3 and later). The user can also get roles in those organizations. The same account can then sign in to the organizations' applications. The resource manages all shares of the user. The server applies changes in the background, and the provider waits until they are visible. To import, use the user ID.
+        name: wso2is_user_share
+        title: wso2is_user_share Resource - wso2is
+        examples:
+            - name: support
+              manifest: |-
+                {
+                  "depends_on": [
+                    "${wso2is_application_share.portal}"
+                  ],
+                  "organizations": [
+                    {
+                      "include_children": true,
+                      "organization_id": "${wso2is_organization.partner.id}",
+                      "roles": [
+                        {
+                          "audience_name": "${wso2is_application.portal.name}",
+                          "audience_type": "application",
+                          "name": "${wso2is_role.support_agent.name}"
+                        }
+                      ]
+                    }
+                  ],
+                  "user_id": "${wso2is_user.support.id}"
+                }
+              references:
+                user_id: wso2is_user.support.id
+              dependencies:
+                wso2is_application.portal: |-
+                    {
+                      "associated_roles": {
+                        "allowed_audience": "APPLICATION"
+                      },
+                      "name": "Partner Portal",
+                      "oidc": {
+                        "callback_urls": [
+                          "https://portal.example.com/callback"
+                        ],
+                        "grant_types": [
+                          "authorization_code"
+                        ]
+                      }
+                    }
+                wso2is_application_share.portal: |-
+                    {
+                      "application_id": "${wso2is_application.portal.id}",
+                      "depends_on": [
+                        "${wso2is_role.support_agent}"
+                      ],
+                      "organization_ids": [
+                        "${wso2is_organization.partner.id}"
+                      ]
+                    }
+                wso2is_organization.partner: |-
+                    {
+                      "name": "Partner Inc"
+                    }
+                wso2is_role.support_agent: |-
+                    {
+                      "audience_id": "${wso2is_application.portal.id}",
+                      "audience_type": "application",
+                      "name": "support-agent"
+                    }
+                wso2is_user.support: |-
+                    {
+                      "email": "sam@example.com",
+                      "password": "${var.sam_password}",
+                      "username": "sam"
+                    }
+        argumentDocs:
+            audience_name: (String) Name of the application, or of the organization for organization roles.
+            audience_type: (String) application for a role of a shared application, organization for an organization role.
+            id: (String) Same as user_id.
+            include_children: (Boolean) Also share with the organization's current and future child organizations. false when omitted.
+            name: (String) Role name.
+            organization_id: (String) Organization ID.
+            organizations: (Attributes Set) Organizations to share the user with. (see below for nested schema)
+            roles: (Attributes Set) Roles the shared user gets in the organization(s). None when omitted. (see below for nested schema)
+            share_with_all: (Attributes) Share with every current and future organization. Conflicts with organizations. (see below for nested schema)
+            user_id: (String) ID of a user of the root organization.
+        importStatements:
+            - terraform import wso2is_user_share.support <user_id>
+    wso2is_userstore:
+        subCategory: ""
+        description: Manages a secondary user store. A user store can be a JDBC database, a read-only or read-write LDAP directory, or Active Directory. Users and groups in a secondary user store have the store's domain name as a prefix, for example CUSTOMERS/alice. In wso2is_user, set user_store = "CUSTOMERS". The server deploys user stores in the background, and the provider waits until the server reports the change. The provider only manages the property keys in your configuration. To import, use the user store's domain name.
+        name: wso2is_userstore
+        title: wso2is_userstore Resource - wso2is
+        examples:
+            - name: customers
+              manifest: |-
+                {
+                  "description": "Customer accounts",
+                  "name": "CUSTOMERS",
+                  "properties": {
+                    "driverName": "org.postgresql.Driver",
+                    "url": "jdbc:postgresql://db.example.com:5432/customers",
+                    "userName": "wso2"
+                  },
+                  "secret_properties": {
+                    "password": "${var.customers_db_password}"
+                  },
+                  "type": "UniqueIDJDBCUserStoreManager"
+                }
+              dependencies:
+                wso2is_user.customer: |-
+                    {
+                      "email": "jane@example.com",
+                      "password": "${var.jane_password}",
+                      "user_store": "${wso2is_userstore.customers.name}",
+                      "username": "jane"
+                    }
+        argumentDocs:
+            claim_attribute_mappings: (Map of String) User store attribute by local claim URI, for claims that use a different attribute in this user store.
+            description: (String) Description.
+            enabled: (Boolean) Whether the user store is enabled (the Disabled property). The default is true.
+            id: (String) User store ID (base64url of the domain name).
+            name: (String) Domain name, for example CUSTOMERS. Changing it replaces the user store.
+            properties: (Map of String) The user store's properties. A JDBC store needs url, userName and driverName (for example org.postgresql.Driver). An LDAP store needs properties such as ConnectionURL, ConnectionName, UserSearchBase, UserNameAttribute and GroupSearchBase. The Console and GET /userstores/meta/types/{type-id} list every property.
+            secret_properties: (Map of String, Sensitive) Confidential properties, such as password for JDBC or ConnectionPassword for LDAP. The server returns them encrypted, so the provider cannot notice changes made outside Terraform.
+            type: '(String) User store manager type: UniqueIDJDBCUserStoreManager, UniqueIDReadOnlyLDAPUserStoreManager, UniqueIDReadWriteLDAPUserStoreManager or UniqueIDActiveDirectoryUserStoreManager. Changing it replaces the user store.'
+            type_id: (String) Type ID used by the API.
+        importStatements:
+            - terraform import wso2is_userstore.customers CUSTOMERS
+    wso2is_validation_rules:
+        subCategory: ""
+        description: Sets the validation rules for usernames or passwords. In the Console, these rules are under Login & Registration > Password Validation and Username Validation. Use either rule validators or a single regular expression. When you destroy the resource, the provider sets the field's rules back to the server defaults, unless restore_on_destroy = false. To import, use the field name.
+        name: wso2is_validation_rules
+        title: wso2is_validation_rules Resource - wso2is
+        examples:
+            - name: password
+              manifest: |-
+                {
+                  "field": "password",
+                  "rules": [
+                    {
+                      "properties": {
+                        "max.length": "64",
+                        "min.length": "12"
+                      },
+                      "validator": "LengthValidator"
+                    },
+                    {
+                      "properties": {
+                        "min.length": "1"
+                      },
+                      "validator": "NumeralValidator"
+                    },
+                    {
+                      "properties": {
+                        "min.length": "1"
+                      },
+                      "validator": "UpperCaseValidator"
+                    },
+                    {
+                      "properties": {
+                        "min.length": "1"
+                      },
+                      "validator": "LowerCaseValidator"
+                    },
+                    {
+                      "properties": {
+                        "min.length": "1"
+                      },
+                      "validator": "SpecialCharacterValidator"
+                    },
+                    {
+                      "properties": {
+                        "max.consecutive.character": "3"
+                      },
+                      "validator": "RepeatedCharacterValidator"
+                    }
+                  ]
+                }
+            - name: username
+              manifest: |-
+                {
+                  "field": "username",
+                  "rules": [
+                    {
+                      "properties": {
+                        "max.length": "40",
+                        "min.length": "3"
+                      },
+                      "validator": "LengthValidator"
+                    },
+                    {
+                      "properties": {
+                        "enable.special.characters": "true",
+                        "enable.validator": "true"
+                      },
+                      "validator": "AlphanumericValidator"
+                    }
+                  ]
+                }
+        argumentDocs:
+            field: (String) password or username.
+            id: (String) Same as field.
+            properties: (Map of String) Validator properties.
+            regex: (String) A JavaScript regular expression that the value must match (the server's JsRegExValidator). You cannot use it together with rules. Only passwords accept a regular expression. The server rejects one for username.
+            restore_on_destroy: (Boolean) Revert the field's rules to the server defaults on destroy. The default is true.
+            rules: (Attributes Set) Rule validators, for example LengthValidator (min.length, max.length), NumeralValidator, UpperCaseValidator, LowerCaseValidator, SpecialCharacterValidator (min.length), UniqueCharacterValidator (min.unique.character), RepeatedCharacterValidator (max.consecutive.character), AlphanumericValidator (enable.validator, enable.special.characters), EmailFormatValidator (enable.validator). (see below for nested schema)
+            validator: (String) Validator name.
+        importStatements:
+            - terraform import wso2is_validation_rules.password password
+    wso2is_vc_template:
+        subCategory: ""
+        description: 'Manages a verifiable credential template (WSO2 IS 7.3 and later, OpenID for Verifiable Credential Issuance). The template describes a credential that digital wallets can request: its format, the user attributes that it carries and how long it is valid. The server creates a credential offer for the template. To import, use the template ID.'
+        name: wso2is_vc_template
+        title: wso2is_vc_template Resource - wso2is
+        examples:
+            - name: employee_badge
+              manifest: |-
+                {
+                  "claims": {
+                    "department": "${wso2is_external_claim.department_vc.claim_uri}",
+                    "email": "email",
+                    "family_name": "family_name",
+                    "given_name": "given_name"
+                  },
+                  "display_name": "Employee badge",
+                  "expires_in": 31536000,
+                  "format": "dc+sd-jwt",
+                  "identifier": "EmployeeBadge"
+                }
+              dependencies:
+                wso2is_external_claim.department_vc: |-
+                    {
+                      "claim_uri": "department",
+                      "dialect_uri": "http://wso2.org/vc/claim",
+                      "mapped_local_claim_uri": "http://wso2.org/claims/department"
+                    }
+        argumentDocs:
+            claims: (Map of String) The claims in the credential. Each key is a claim name in the credential. Each value is a claim of the http://wso2.org/vc/claim dialect, for example { given_name = "given_name", mail = "email" }. To use a custom attribute, first map it into that dialect with wso2is_external_claim.
+            display_name: (String) Name shown to users and wallets.
+            expires_in: (Number) Lifetime of issued credentials in seconds (at least 60).
+            format: '(String) Credential format: jwt_vc_json (default) or dc+sd-jwt (selective disclosure).'
+            id: (String) Template ID.
+            identifier: (String) Stable identifier of the credential type (published as credential_configuration_id), for example EmployeeBadge. Changing it replaces the template.
+            offer_id: (String) ID of the credential offer the server generated for the template.
+        importStatements:
+            - terraform import wso2is_vc_template.employee_badge <template_id>
+    wso2is_webhook:
+        subCategory: ""
+        description: Manages a webhook (WSO2 IS 7.2 and later). The server sends identity events to the webhook as signed HTTP POST requests. Events include logins, sessions, changes to user accounts, registrations, tokens and credential updates. To import, use the webhook ID.
+        name: wso2is_webhook
+        title: wso2is_webhook Resource - wso2is
+        examples:
+            - name: audit
+              manifest: |-
+                {
+                  "channels": [
+                    "https://schemas.identity.wso2.org/events/login",
+                    "https://schemas.identity.wso2.org/events/user"
+                  ],
+                  "endpoint": "https://hooks.example.com/wso2is",
+                  "name": "Audit events",
+                  "secret": "${var.webhook_secret}"
+                }
+              references:
+                secret: var.webhook_secret
+        argumentDocs:
+            active: (Boolean) Whether events are sent. The default is true.
+            channels: (Set of String) Channel URIs to subscribe to, for example https://schemas.identity.wso2.org/events/login, .../session, .../user, .../registration, .../token, .../credential.
+            endpoint: (String) HTTPS URL events are posted to.
+            event_profile: (String) Event profile name. The default is WSO2.
+            event_profile_uri: (String) Event profile URI. The default is https://schemas.identity.wso2.org/events.
+            id: (String) Webhook ID.
+            name: (String) Webhook name.
+            secret: (String, Sensitive) The secret that the server uses to sign each payload (X-WSO2-Event-Signature). The server never returns it, so the provider cannot notice changes made outside Terraform.
+            status: '(String) The webhook''s status on the server: ACTIVE, PARTIALLY_ACTIVE, INACTIVE or PARTIALLY_INACTIVE. A partial status means that some channel subscriptions failed.'
+        importStatements:
+            - terraform import wso2is_webhook.audit <webhook_id>
+    wso2is_workflow:
+        subCategory: ""
+        description: Manages an approval workflow. A workflow is a sequence of approval steps. Users with given roles, or given users, approve each step. Attach the workflow to user and role operations with wso2is_workflow_association. While a workflow is attached to an operation, such as ADD_USER, the operation only finishes after someone approves it. Terraform resources that perform the operation, such as wso2is_user, then fail, because the object does not exist yet. To import, use the workflow ID.
+        name: wso2is_workflow
+        title: wso2is_workflow Resource - wso2is
+        examples:
+            - name: role_changes
+              manifest: |-
+                {
+                  "description": "Changes to roles need two approvals",
+                  "name": "Role changes",
+                  "steps": [
+                    {
+                      "role_ids": [
+                        "${data.wso2is_role.admin.id}"
+                      ]
+                    },
+                    {
+                      "role_ids": [
+                        "${wso2is_role.security_officers.id}"
+                      ]
+                    }
+                  ]
+                }
+              dependencies:
+                wso2is_role.security_officers: |-
+                    {
+                      "name": "security-officers"
+                    }
+        argumentDocs:
+            approver_notifications: (Attributes) Notifications to approvers (events such as onAssignment, onRelease). (see below for nested schema)
+            channels: (Set of String) Notification channels, for example email.
+            description: (String) Description.
+            engine: (String) Workflow engine. The default is WorkflowEngine.
+            events: (Set of String) Events that trigger a notification.
+            id: (String) Workflow ID.
+            initiator_notifications: (Attributes) Notifications to the user who started the operation (events such as onApproval, onRejection). (see below for nested schema)
+            name: (String) Workflow name.
+            role_ids: (Set of String) IDs of roles whose users can approve.
+            steps: (Attributes List) Approval steps, in order. A step is approved by any user holding one of role_ids or listed in user_ids. (see below for nested schema)
+            template: (String) Workflow template. The default is MultiStepApprovalTemplate.
+            user_ids: (Set of String) IDs of users who can approve.
+        importStatements:
+            - terraform import wso2is_workflow.role_changes <workflow_id>
+    wso2is_workflow_association:
+        subCategory: ""
+        description: Makes a user or role operation wait for approval through a wso2is_workflow. To import, use the association ID.
+        name: wso2is_workflow_association
+        title: wso2is_workflow_association Resource - wso2is
+        examples:
+            - name: deletions
+              manifest: |-
+                {
+                  "name": "User deletions need approval",
+                  "operation": "DELETE_USER",
+                  "workflow_id": "${wso2is_workflow.approvals.id}"
+                }
+              references:
+                workflow_id: wso2is_workflow.approvals.id
+              dependencies:
+                wso2is_workflow.approvals: |-
+                    {
+                      "name": "Administrator approval",
+                      "steps": [
+                        {
+                          "role_ids": [
+                            "${data.wso2is_role.admin.id}"
+                          ]
+                        }
+                      ]
+                    }
+        argumentDocs:
+            enabled: (Boolean) Whether the association is active. The default is true.
+            expressions: (Attributes List) Expressions, all of which must match. (see below for nested schema)
+            field: (String) Field, for example role or user.groups.
+            id: (String) Association ID.
+            name: (String) Association name.
+            operation: '(String) Operation: ADD_USER, SELF_REGISTER_USER, DELETE_USER, UPDATE_ROLES_OF_USERS, ADD_ROLE, DELETE_ROLE, UPDATE_ROLE_NAME, UPDATE_USERS_OF_ROLES, DELETE_USER_CLAIMS or UPDATE_USER_CLAIMS.'
+            operator: (String) equals or notEquals.
+            rules: (Attributes List) Rules that decide when an operation needs approval. Approval is needed when any rule matches. A rule matches when all of its expressions match. Without rules, every operation needs approval. (see below for nested schema)
+            value: (String) Value to compare with.
+            workflow_id: (String) Workflow ID.
+        importStatements:
+            - terraform import wso2is_workflow_association.deletions <association_id>

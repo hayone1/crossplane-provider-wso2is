@@ -1,0 +1,51 @@
+apiVersion: application.wso2is.m.crossplane.io/v1alpha1
+kind: ApplicationShare
+metadata:
+  annotations:
+    meta.upbound.io/example-id: application/v1alpha1/applicationshare
+  labels:
+    testing.upbound.io/example-name: portal
+  name: portal
+  namespace: default
+spec:
+  forProvider:
+    applicationIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: portal
+    organizationIdsRefs:
+    - name: partner
+
+---
+
+apiVersion: application.wso2is.m.crossplane.io/v1alpha1
+kind: Application
+metadata:
+  annotations:
+    meta.upbound.io/example-id: application/v1alpha1/applicationshare
+  labels:
+    testing.upbound.io/example-name: portal
+  name: portal
+  namespace: default
+spec:
+  forProvider:
+    name: Partner Portal
+    oidc:
+      callbackUrls:
+      - https://partners.example.com/callback
+      grantTypes:
+      - authorization_code
+
+---
+
+apiVersion: organization.wso2is.m.crossplane.io/v1alpha1
+kind: Organization
+metadata:
+  annotations:
+    meta.upbound.io/example-id: application/v1alpha1/applicationshare
+  labels:
+    testing.upbound.io/example-name: partner
+  name: partner
+  namespace: default
+spec:
+  forProvider:
+    name: Partner Inc

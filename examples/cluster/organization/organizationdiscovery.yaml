@@ -1,0 +1,29 @@
+# The email domains of an organization's users. Email domain discovery must be on, so this
+# file turns it on too. Delete the OrganizationDiscovery before the configuration.
+apiVersion: organization.wso2is.crossplane.io/v1alpha1
+kind: OrganizationDiscovery
+metadata:
+  name: domains-partner
+spec:
+  forProvider:
+    organizationIdRef:
+      name: domains-partner
+    emailDomains:
+      - partner.example
+      - partner-eu.example
+---
+apiVersion: organization.wso2is.crossplane.io/v1alpha1
+kind: Organization
+metadata:
+  name: domains-partner
+spec:
+  forProvider:
+    name: Domains Partner Inc
+---
+apiVersion: organization.wso2is.crossplane.io/v1alpha1
+kind: OrganizationDiscoveryConfiguration
+metadata:
+  name: discovery-for-domains
+spec:
+  forProvider:
+    emailDomainEnabled: true

@@ -1,0 +1,49 @@
+# A web application that signs users in with OpenID Connect. The application writes its
+# OAuth2 client ID and client secret into the Secret "portal-oidc-client".
+apiVersion: application.wso2is.m.crossplane.io/v1alpha1
+kind: Application
+metadata:
+  namespace: default
+  name: portal
+spec:
+  forProvider:
+    name: Customer Portal
+    description: Self-service portal
+    accessUrl: https://portal.example.com
+    templateId: oidc-web-application
+    advancedConfiguration:
+      skipLoginConsent: true
+    # Users sign in with a password and then with a one-time code.
+    authenticationSequence:
+      steps:
+        - options:
+            - authenticator: BasicAuthenticator
+              idp: LOCAL
+        - options:
+            - authenticator: totp
+              idp: LOCAL
+            - authenticator: email-otp-authenticator
+              idp: LOCAL
+    claimConfiguration:
+      requestedClaims:
+        - uri: http://wso2.org/claims/emailaddress
+          mandatory: true
+        - uri: http://wso2.org/claims/givenname
+    oidc:
+      grantTypes:
+        - authorization_code
+        - refresh_token
+      callbackUrls:
+        - https://portal.example.com/callback
+      allowedOrigins:
+        - https://portal.example.com
+      pkce:
+        mandatory: true
+      accessToken:
+        type: JWT
+        userAccessTokenExpiryInSeconds: 900
+      refreshToken:
+        expiryInSeconds: 86400
+        renewRefreshToken: true
+  writeConnectionSecretToRef:
+    name: portal-oidc-client

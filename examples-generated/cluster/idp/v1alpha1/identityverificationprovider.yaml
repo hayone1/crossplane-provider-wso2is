@@ -1,0 +1,22 @@
+apiVersion: idp.wso2is.crossplane.io/v1alpha1
+kind: IdentityVerificationProvider
+metadata:
+  annotations:
+    meta.upbound.io/example-id: idp/v1alpha1/identityverificationprovider
+  labels:
+    testing.upbound.io/example-name: onfido
+  name: onfido
+spec:
+  forProvider:
+    claimMappings:
+      http://wso2.org/claims/givenname: first_name
+      http://wso2.org/claims/lastname: last_name
+    name: Onfido
+    properties:
+      base_url: https://api.eu.onfido.com/v3.6
+      workflow_id: f0b8...
+    secretPropertiesSecretRef:
+      key: example-key
+      name: example-secret
+      namespace: upbound-system
+    type: ONFIDO

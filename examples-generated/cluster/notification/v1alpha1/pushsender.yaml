@@ -1,0 +1,17 @@
+apiVersion: notification.wso2is.crossplane.io/v1alpha1
+kind: PushSender
+metadata:
+  annotations:
+    meta.upbound.io/example-id: notification/v1alpha1/pushsender
+  labels:
+    testing.upbound.io/example-name: fcm
+  name: fcm
+spec:
+  forProvider:
+    default: true
+    fcm:
+      serviceAccountJsonSecretRef:
+        key: example-key
+        name: example-secret
+        namespace: upbound-system
+    providerName: FCM

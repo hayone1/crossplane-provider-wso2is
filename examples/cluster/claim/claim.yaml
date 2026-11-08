@@ -1,0 +1,19 @@
+# A custom user attribute (a local claim). The primary user store keeps it in the
+# attribute "loyaltyTier".
+apiVersion: claim.wso2is.crossplane.io/v1alpha1
+kind: Claim
+metadata:
+  name: loyalty-tier
+spec:
+  forProvider:
+    claimUri: http://wso2.org/claims/loyaltyTier
+    displayName: Loyalty tier
+    description: The customer's loyalty program tier
+    attributeMappings:
+      PRIMARY: loyaltyTier
+    supportedByDefault: true
+    canonicalValues:
+      - label: Silver
+        value: silver
+      - label: Gold
+        value: gold

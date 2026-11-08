@@ -1,0 +1,1192 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.23.0
+  name: identityproviders.idp.wso2is.m.crossplane.io
+spec:
+  group: idp.wso2is.m.crossplane.io
+  names:
+    categories:
+    - crossplane
+    - managed
+    - wso2is
+    kind: IdentityProvider
+    listKind: IdentityProviderList
+    plural: identityproviders
+    singular: identityprovider
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.conditions[?(@.type=='Synced')].status
+      name: SYNCED
+      type: string
+    - jsonPath: .status.conditions[?(@.type=='Ready')].status
+      name: READY
+      type: string
+    - jsonPath: .metadata.annotations.crossplane\.io/external-name
+      name: EXTERNAL-NAME
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: AGE
+      type: date
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: IdentityProvider is the Schema for the IdentityProviders API.
+          Manages an identity provider, which the Console calls a connection. An identity
+          provider lets users sign in with another system. Examples are social logins
+          (Google, GitHub, Facebook, Microsoft and Apple) and any OpenID Connect or
+          SAML provider. The resource also manages claim and role mappings, just-in-time
+          provisioning and outbound provisioning. Authenticator and connector settings
+          are properties with the names that the server uses. The wso2is_federated_authenticator_metadata
+          data source lists them. The provider only manages the property keys that
+          you set. Put secrets in secret_properties, so that plans hide them. To use
+          the identity provider for login, add it to an application's authentication_sequence.
+          To manage an existing object, set the crossplane.io/external-name annotation
+          to its ID.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: IdentityProviderSpec defines the desired state of IdentityProvider
+            properties:
+              forProvider:
+                properties:
+                  alias:
+                    description: |-
+                      (String) Alias used as the audience of tokens this provider issues (for example the token endpoint of the resident IdP).
+                      Alias used as the audience of tokens this provider issues (for example the token endpoint of the resident IdP).
+                    type: string
+                  certificates:
+                    description: |-
+                      (List of String) PEM certificates of the provider (for validating signed responses and tokens). Conflicts with jwks_uri.
+                      PEM certificates of the provider (for validating signed responses and tokens). Conflicts with `jwks_uri`.
+                    items:
+                      type: string
+                    type: array
+                  claims:
+                    description: (Attributes) Claim mappings from the provider's attributes
+                      to local claims. (see below for nested schema)
+                    properties:
+                      mappings:
+                        description: (Attributes Set) Provider claim to local claim
+                          mappings. Without mappings the provider's claims are used
+                          as is. (see below for nested schema)
+                        items:
+                          properties:
+                            idpClaim:
+                              description: |-
+                                (String) Claim name used by the provider.
+                                Claim name used by the provider.
+                              type: string
+                            localClaim:
+                              description: |-
+                                (String) Local claim URI.
+                                Local claim URI.
+                              type: string
+                          type: object
+                        type: array
+                      provisioningClaims:
+                        description: (Attributes Set) Default values of claims for
+                          outbound provisioning. (see below for nested schema)
+                        items:
+                          properties:
+                            claim:
+                              description: |-
+                                (String) Claim URI.
+                                Claim URI.
+                              type: string
+                            defaultValue:
+                              description: |-
+                                (String) Default value.
+                                Default value.
+                              type: string
+                          type: object
+                        type: array
+                      roleClaim:
+                        description: |-
+                          (String) Provider claim that carries roles.
+                          Provider claim that carries roles.
+                        type: string
+                      userIdClaim:
+                        description: |-
+                          (String) The identity provider's claim that identifies the user. When it is empty, the server uses the subject.
+                          The identity provider's claim that identifies the user. When it is empty, the server uses the subject.
+                        type: string
+                    type: object
+                  defaultAuthenticator:
+                    description: |-
+                      (String) Name of the federated authenticator used by default. The default is the only (or first) configured authenticator.
+                      Name of the federated authenticator used by default. The default is the only (or first) configured authenticator.
+                    type: string
+                  defaultOutboundConnector:
+                    description: |-
+                      (String) Name of the default outbound provisioning connector.
+                      Name of the default outbound provisioning connector.
+                    type: string
+                  description:
+                    description: |-
+                      (String) Description.
+                      Description.
+                    type: string
+                  enabled:
+                    description: |-
+                      (Boolean) Whether the connection can be used. The default is true.
+                      Whether the connection can be used. The default is `true`.
+                    type: boolean
+                  federatedAuthenticatorEndpointAuthenticationPropertiesSecretRef:
+                    description: |-
+                      Credentials that the server sends to the endpoints of custom federated authenticators. Each key of the Secret has the form <authenticator>.<property>, for example MyAuthenticator.password. The authenticator must be listed in federatedAuthenticators and have an endpoint.
+                      Credentials that the server sends to the endpoints of custom federated authenticators. Each key of the Secret has the form <authenticator>.<property>, for example MyAuthenticator.password. The authenticator must be listed in federatedAuthenticators and have an endpoint.
+                    properties:
+                      name:
+                        description: Name of the secret.
+                        type: string
+                    required:
+                    - name
+                    type: object
+                  federatedAuthenticatorSecretPropertiesSecretRef:
+                    description: |-
+                      Secret properties of the federated authenticators, such as client secrets. Each key of the Secret has the form <authenticator>.<property>, for example GoogleOIDCAuthenticator.ClientSecret. The authenticator must be listed in federatedAuthenticators.
+                      Secret properties of the federated authenticators, such as client secrets. Each key of the Secret has the form <authenticator>.<property>, for example GoogleOIDCAuthenticator.ClientSecret. The authenticator must be listed in federatedAuthenticators.
+                    properties:
+                      name:
+                        description: Name of the secret.
+                        type: string
+                    required:
+                    - name
+                    type: object
+                  federatedAuthenticators:
+                    additionalProperties:
+                      properties:
+                        enabled:
+                          description: |-
+                            (Boolean) Whether the connection can be used. The default is true.
+                            Whether the authenticator is enabled. The default is `true`.
+                          type: boolean
+                        endpoint:
+                          description: (Attributes) External service endpoint of a
+                            custom (user defined) federated authenticator. (see below
+                            for nested schema)
+                          properties:
+                            authenticationType:
+                              description: |-
+                                (String) NONE, BASIC, BEARER or API_KEY.
+                                `NONE`, `BASIC`, `BEARER` or `API_KEY`.
+                              type: string
+                            uri:
+                              description: |-
+                                (String) HTTPS endpoint.
+                                HTTPS endpoint.
+                              type: string
+                          type: object
+                        properties:
+                          additionalProperties:
+                            type: string
+                          description: |-
+                            (Map of String) Authenticator properties, for example ClientId, callbackUrl, Scopes, OAuth2AuthzEPUrl, OAuth2TokenEPUrl, UserInfoUrl (OIDC) or IdPEntityId, SSOUrl, SPEntityId (SAML).
+                            Authenticator properties, for example `ClientId`, `callbackUrl`, `Scopes`, `OAuth2AuthzEPUrl`, `OAuth2TokenEPUrl`, `UserInfoUrl` (OIDC) or `IdPEntityId`, `SSOUrl`, `SPEntityId` (SAML).
+                          type: object
+                          x-kubernetes-map-type: granular
+                      type: object
+                    description: '(Attributes Map) Federated authenticators, keyed
+                      by authenticator name: GoogleOIDCAuthenticator, GithubAuthenticator,
+                      FacebookAuthenticator, MicrosoftWindowsLiveAuthenticator, Office365Authenticator,
+                      AppleOIDCAuthenticator, TwitterAuthenticator, OpenIDConnectAuthenticator,
+                      SAMLSSOAuthenticator, PassiveSTSAuthenticator, IWAKerberosAuthenticator,
+                      EmailOTP, SMSOTP, or a custom authenticator. (see below for
+                      nested schema)'
+                    type: object
+                  forceDelete:
+                    description: |-
+                      (Boolean) Delete the connection even when applications still use it. The default is false.
+                      Delete the connection even when applications still use it. The default is `false`.
+                    type: boolean
+                  groups:
+                    description: |-
+                      (Set of String) Groups defined at the provider that can be mapped to local roles.
+                      Groups defined at the provider that can be mapped to local roles.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  homeRealmIdentifier:
+                    description: |-
+                      (String) Home realm identifier (fidp request parameter value) that selects this provider.
+                      Home realm identifier (`fidp` request parameter value) that selects this provider.
+                    type: string
+                  idpIssuerName:
+                    description: |-
+                      (String) Issuer of tokens from this provider, when different from its name (used to validate JWT bearer grants).
+                      Issuer of tokens from this provider, when different from its name (used to validate JWT bearer grants).
+                    type: string
+                  imageUrl:
+                    description: |-
+                      (String) Logo URL.
+                      Logo URL.
+                    type: string
+                  implicitAssociation:
+                    description: (Attributes) Associate federated users with local
+                      users that have matching attributes. (see below for nested schema)
+                    properties:
+                      enabled:
+                        description: |-
+                          (Boolean) Whether the connection can be used. The default is true.
+                          Enable implicit association. The default is `false`.
+                        type: boolean
+                      lookupAttributes:
+                        description: |-
+                          (List of String) Local claim URIs used to find the local user.
+                          Local claim URIs used to find the local user.
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                  isFederationHub:
+                    description: |-
+                      (Boolean) The provider is a federation hub (it fronts other providers). The default is false.
+                      The provider is a federation hub (it fronts other providers). The default is `false`.
+                    type: boolean
+                  isPrimary:
+                    description: |-
+                      (Boolean) Use as the primary (default) identity provider. The default is false.
+                      Use as the primary (default) identity provider. The default is `false`.
+                    type: boolean
+                  jitProvisioning:
+                    description: in-time provisioning of local accounts for federated
+                      users. (see below for nested schema)
+                    properties:
+                      accountLookupAttributeMappings:
+                        description: (Attributes List) Local and federated attributes
+                          used to find an existing local user. (see below for nested
+                          schema)
+                        items:
+                          properties:
+                            federatedAttribute:
+                              description: |-
+                                (String) Provider claim.
+                                Provider claim.
+                              type: string
+                            localAttribute:
+                              description: |-
+                                (String) Local claim URI.
+                                Local claim URI.
+                              type: string
+                          type: object
+                        type: array
+                      associateLocalUser:
+                        description: |-
+                          (Boolean) Link to an existing local user found through the lookup attributes. The default is false.
+                          Link to an existing local user found through the lookup attributes. The default is `false`.
+                        type: boolean
+                      attributeSyncMethod:
+                        description: |-
+                          (String) OVERRIDE_ALL, PRESERVE_LOCAL or NONE. The default is OVERRIDE_ALL.
+                          `OVERRIDE_ALL`, `PRESERVE_LOCAL` or `NONE`. The default is `OVERRIDE_ALL`.
+                        type: string
+                      enabled:
+                        description: |-
+                          (Boolean) Whether the connection can be used. The default is true.
+                          Create local users on first login. The default is `false`.
+                        type: boolean
+                      idpGroupSyncMethod:
+                        description: |-
+                          (String) MERGE_WITH_EXISTING or OVERRIDE_ALL. The default is MERGE_WITH_EXISTING.
+                          `MERGE_WITH_EXISTING` or `OVERRIDE_ALL`. The default is `MERGE_WITH_EXISTING`.
+                        type: string
+                      scheme:
+                        description: |-
+                          (String) PROVISION_SILENTLY, PROMPT_CONSENT, PROMPT_PASSWORD_CONSENT or PROMPT_USERNAME_PASSWORD_CONSENT. The default is PROVISION_SILENTLY.
+                          `PROVISION_SILENTLY`, `PROMPT_CONSENT`, `PROMPT_PASSWORD_CONSENT` or `PROMPT_USERNAME_PASSWORD_CONSENT`. The default is `PROVISION_SILENTLY`.
+                        type: string
+                      skipJitForLookupFailure:
+                        description: |-
+                          (Boolean) Skip provisioning when the local user lookup fails. The default is false.
+                          Skip provisioning when the local user lookup fails. The default is `false`.
+                        type: boolean
+                      userStore:
+                        description: |-
+                          (String) User store for provisioned users. The default is PRIMARY.
+                          User store for provisioned users. The default is `PRIMARY`.
+                        type: string
+                    type: object
+                  jwksUri:
+                    description: |-
+                      (String) JWKS endpoint used to validate tokens signed by the provider. Conflicts with certificates.
+                      JWKS endpoint used to validate tokens signed by the provider. Conflicts with `certificates`.
+                    type: string
+                  name:
+                    description: |-
+                      (String) Unique name, used in authentication steps.
+                      Unique name, used in authentication steps.
+                    type: string
+                  outboundProvisioningConnectorSecretPropertiesSecretRef:
+                    description: |-
+                      password. The connector must be listed in outboundProvisioningConnectors.
+                      Secret properties of the outbound provisioning connectors. Each key of the Secret has the form <connector>.<property>, for example scim2.scim2-password. The connector must be listed in outboundProvisioningConnectors.
+                    properties:
+                      name:
+                        description: Name of the secret.
+                        type: string
+                    required:
+                    - name
+                    type: object
+                  outboundProvisioningConnectors:
+                    additionalProperties:
+                      properties:
+                        blockingEnabled:
+                          description: |-
+                            (Boolean) Provision synchronously.
+                            Provision synchronously.
+                          type: boolean
+                        enabled:
+                          description: |-
+                            (Boolean) Whether the connection can be used. The default is true.
+                            Enabled. The default is `true`.
+                          type: boolean
+                        properties:
+                          additionalProperties:
+                            type: string
+                          description: |-
+                            (Map of String) Authenticator properties, for example ClientId, callbackUrl, Scopes, OAuth2AuthzEPUrl, OAuth2TokenEPUrl, UserInfoUrl (OIDC) or IdPEntityId, SSOUrl, SPEntityId (SAML).
+                            Connector properties, for example `scim2-user-ep`, `scim2-username`.
+                          type: object
+                          x-kubernetes-map-type: granular
+                        rulesEnabled:
+                          description: |-
+                            (Boolean) Apply provisioning rules.
+                            Apply provisioning rules.
+                          type: boolean
+                      type: object
+                    description: '(Attributes Map) Outbound provisioning connectors
+                      keyed by name: SCIM2, scim, googleapps, salesforce. (see below
+                      for nested schema)'
+                    type: object
+                  outboundProvisioningRoles:
+                    description: |-
+                      (Set of String) Only users with these roles are provisioned to this provider.
+                      Only users with these roles are provisioned to this provider.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  roleMappings:
+                    description: (Attributes Set) Provider role to local role mappings.
+                      (see below for nested schema)
+                    items:
+                      properties:
+                        idpRole:
+                          description: |-
+                            (String) Role name sent by the provider.
+                            Role name sent by the provider.
+                          type: string
+                        localRole:
+                          description: |-
+                            (String) Local role, as Internal/<role name> for organization roles (WSO2 silently ignores other formats).
+                            Local role, as `Internal/<role name>` for organization roles (WSO2 silently ignores other formats).
+                          type: string
+                      type: object
+                    type: array
+                  templateId:
+                    description: |-
+                      idp, github-idp, enterprise-oidc-idp or enterprise-saml-idp. The template only changes how the Console shows the connection. The server only accepts it at creation, so changing it replaces the connection.
+                      The Console template, for example `google-idp`, `github-idp`, `enterprise-oidc-idp` or `enterprise-saml-idp`. The template only changes how the Console shows the connection. The server only accepts it at creation, so changing it replaces the connection.
+                    type: string
+                type: object
+              initProvider:
+                description: |-
+                  THIS IS A BETA FIELD. It will be honored
+                  unless the Management Policies feature flag is disabled.
+                  InitProvider holds the same fields as ForProvider, with the exception
+                  of Identifier and other resource reference fields. The fields that are
+                  in InitProvider are merged into ForProvider when the resource is created.
+                  The same fields are also added to the terraform ignore_changes hook, to
+                  avoid updating them after creation. This is useful for fields that are
+                  required on creation, but we do not desire to update them after creation,
+                  for example because of an external controller is managing them, like an
+                  autoscaler.
+                properties:
+                  alias:
+                    description: |-
+                      (String) Alias used as the audience of tokens this provider issues (for example the token endpoint of the resident IdP).
+                      Alias used as the audience of tokens this provider issues (for example the token endpoint of the resident IdP).
+                    type: string
+                  certificates:
+                    description: |-
+                      (List of String) PEM certificates of the provider (for validating signed responses and tokens). Conflicts with jwks_uri.
+                      PEM certificates of the provider (for validating signed responses and tokens). Conflicts with `jwks_uri`.
+                    items:
+                      type: string
+                    type: array
+                  claims:
+                    description: (Attributes) Claim mappings from the provider's attributes
+                      to local claims. (see below for nested schema)
+                    properties:
+                      mappings:
+                        description: (Attributes Set) Provider claim to local claim
+                          mappings. Without mappings the provider's claims are used
+                          as is. (see below for nested schema)
+                        items:
+                          properties:
+                            idpClaim:
+                              description: |-
+                                (String) Claim name used by the provider.
+                                Claim name used by the provider.
+                              type: string
+                            localClaim:
+                              description: |-
+                                (String) Local claim URI.
+                                Local claim URI.
+                              type: string
+                          type: object
+                        type: array
+                      provisioningClaims:
+                        description: (Attributes Set) Default values of claims for
+                          outbound provisioning. (see below for nested schema)
+                        items:
+                          properties:
+                            claim:
+                              description: |-
+                                (String) Claim URI.
+                                Claim URI.
+                              type: string
+                            defaultValue:
+                              description: |-
+                                (String) Default value.
+                                Default value.
+                              type: string
+                          type: object
+                        type: array
+                      roleClaim:
+                        description: |-
+                          (String) Provider claim that carries roles.
+                          Provider claim that carries roles.
+                        type: string
+                      userIdClaim:
+                        description: |-
+                          (String) The identity provider's claim that identifies the user. When it is empty, the server uses the subject.
+                          The identity provider's claim that identifies the user. When it is empty, the server uses the subject.
+                        type: string
+                    type: object
+                  defaultAuthenticator:
+                    description: |-
+                      (String) Name of the federated authenticator used by default. The default is the only (or first) configured authenticator.
+                      Name of the federated authenticator used by default. The default is the only (or first) configured authenticator.
+                    type: string
+                  defaultOutboundConnector:
+                    description: |-
+                      (String) Name of the default outbound provisioning connector.
+                      Name of the default outbound provisioning connector.
+                    type: string
+                  description:
+                    description: |-
+                      (String) Description.
+                      Description.
+                    type: string
+                  enabled:
+                    description: |-
+                      (Boolean) Whether the connection can be used. The default is true.
+                      Whether the connection can be used. The default is `true`.
+                    type: boolean
+                  federatedAuthenticatorEndpointAuthenticationPropertiesSecretRef:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  federatedAuthenticatorSecretPropertiesSecretRef:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  federatedAuthenticators:
+                    additionalProperties:
+                      properties:
+                        enabled:
+                          description: |-
+                            (Boolean) Whether the connection can be used. The default is true.
+                            Whether the authenticator is enabled. The default is `true`.
+                          type: boolean
+                        endpoint:
+                          description: (Attributes) External service endpoint of a
+                            custom (user defined) federated authenticator. (see below
+                            for nested schema)
+                          properties:
+                            authenticationType:
+                              description: |-
+                                (String) NONE, BASIC, BEARER or API_KEY.
+                                `NONE`, `BASIC`, `BEARER` or `API_KEY`.
+                              type: string
+                            uri:
+                              description: |-
+                                (String) HTTPS endpoint.
+                                HTTPS endpoint.
+                              type: string
+                          type: object
+                        properties:
+                          additionalProperties:
+                            type: string
+                          description: |-
+                            (Map of String) Authenticator properties, for example ClientId, callbackUrl, Scopes, OAuth2AuthzEPUrl, OAuth2TokenEPUrl, UserInfoUrl (OIDC) or IdPEntityId, SSOUrl, SPEntityId (SAML).
+                            Authenticator properties, for example `ClientId`, `callbackUrl`, `Scopes`, `OAuth2AuthzEPUrl`, `OAuth2TokenEPUrl`, `UserInfoUrl` (OIDC) or `IdPEntityId`, `SSOUrl`, `SPEntityId` (SAML).
+                          type: object
+                          x-kubernetes-map-type: granular
+                      type: object
+                    description: '(Attributes Map) Federated authenticators, keyed
+                      by authenticator name: GoogleOIDCAuthenticator, GithubAuthenticator,
+                      FacebookAuthenticator, MicrosoftWindowsLiveAuthenticator, Office365Authenticator,
+                      AppleOIDCAuthenticator, TwitterAuthenticator, OpenIDConnectAuthenticator,
+                      SAMLSSOAuthenticator, PassiveSTSAuthenticator, IWAKerberosAuthenticator,
+                      EmailOTP, SMSOTP, or a custom authenticator. (see below for
+                      nested schema)'
+                    type: object
+                  forceDelete:
+                    description: |-
+                      (Boolean) Delete the connection even when applications still use it. The default is false.
+                      Delete the connection even when applications still use it. The default is `false`.
+                    type: boolean
+                  groups:
+                    description: |-
+                      (Set of String) Groups defined at the provider that can be mapped to local roles.
+                      Groups defined at the provider that can be mapped to local roles.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  homeRealmIdentifier:
+                    description: |-
+                      (String) Home realm identifier (fidp request parameter value) that selects this provider.
+                      Home realm identifier (`fidp` request parameter value) that selects this provider.
+                    type: string
+                  idpIssuerName:
+                    description: |-
+                      (String) Issuer of tokens from this provider, when different from its name (used to validate JWT bearer grants).
+                      Issuer of tokens from this provider, when different from its name (used to validate JWT bearer grants).
+                    type: string
+                  imageUrl:
+                    description: |-
+                      (String) Logo URL.
+                      Logo URL.
+                    type: string
+                  implicitAssociation:
+                    description: (Attributes) Associate federated users with local
+                      users that have matching attributes. (see below for nested schema)
+                    properties:
+                      enabled:
+                        description: |-
+                          (Boolean) Whether the connection can be used. The default is true.
+                          Enable implicit association. The default is `false`.
+                        type: boolean
+                      lookupAttributes:
+                        description: |-
+                          (List of String) Local claim URIs used to find the local user.
+                          Local claim URIs used to find the local user.
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                  isFederationHub:
+                    description: |-
+                      (Boolean) The provider is a federation hub (it fronts other providers). The default is false.
+                      The provider is a federation hub (it fronts other providers). The default is `false`.
+                    type: boolean
+                  isPrimary:
+                    description: |-
+                      (Boolean) Use as the primary (default) identity provider. The default is false.
+                      Use as the primary (default) identity provider. The default is `false`.
+                    type: boolean
+                  jitProvisioning:
+                    description: in-time provisioning of local accounts for federated
+                      users. (see below for nested schema)
+                    properties:
+                      accountLookupAttributeMappings:
+                        description: (Attributes List) Local and federated attributes
+                          used to find an existing local user. (see below for nested
+                          schema)
+                        items:
+                          properties:
+                            federatedAttribute:
+                              description: |-
+                                (String) Provider claim.
+                                Provider claim.
+                              type: string
+                            localAttribute:
+                              description: |-
+                                (String) Local claim URI.
+                                Local claim URI.
+                              type: string
+                          type: object
+                        type: array
+                      associateLocalUser:
+                        description: |-
+                          (Boolean) Link to an existing local user found through the lookup attributes. The default is false.
+                          Link to an existing local user found through the lookup attributes. The default is `false`.
+                        type: boolean
+                      attributeSyncMethod:
+                        description: |-
+                          (String) OVERRIDE_ALL, PRESERVE_LOCAL or NONE. The default is OVERRIDE_ALL.
+                          `OVERRIDE_ALL`, `PRESERVE_LOCAL` or `NONE`. The default is `OVERRIDE_ALL`.
+                        type: string
+                      enabled:
+                        description: |-
+                          (Boolean) Whether the connection can be used. The default is true.
+                          Create local users on first login. The default is `false`.
+                        type: boolean
+                      idpGroupSyncMethod:
+                        description: |-
+                          (String) MERGE_WITH_EXISTING or OVERRIDE_ALL. The default is MERGE_WITH_EXISTING.
+                          `MERGE_WITH_EXISTING` or `OVERRIDE_ALL`. The default is `MERGE_WITH_EXISTING`.
+                        type: string
+                      scheme:
+                        description: |-
+                          (String) PROVISION_SILENTLY, PROMPT_CONSENT, PROMPT_PASSWORD_CONSENT or PROMPT_USERNAME_PASSWORD_CONSENT. The default is PROVISION_SILENTLY.
+                          `PROVISION_SILENTLY`, `PROMPT_CONSENT`, `PROMPT_PASSWORD_CONSENT` or `PROMPT_USERNAME_PASSWORD_CONSENT`. The default is `PROVISION_SILENTLY`.
+                        type: string
+                      skipJitForLookupFailure:
+                        description: |-
+                          (Boolean) Skip provisioning when the local user lookup fails. The default is false.
+                          Skip provisioning when the local user lookup fails. The default is `false`.
+                        type: boolean
+                      userStore:
+                        description: |-
+                          (String) User store for provisioned users. The default is PRIMARY.
+                          User store for provisioned users. The default is `PRIMARY`.
+                        type: string
+                    type: object
+                  jwksUri:
+                    description: |-
+                      (String) JWKS endpoint used to validate tokens signed by the provider. Conflicts with certificates.
+                      JWKS endpoint used to validate tokens signed by the provider. Conflicts with `certificates`.
+                    type: string
+                  name:
+                    description: |-
+                      (String) Unique name, used in authentication steps.
+                      Unique name, used in authentication steps.
+                    type: string
+                  outboundProvisioningConnectorSecretPropertiesSecretRef:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  outboundProvisioningConnectors:
+                    additionalProperties:
+                      properties:
+                        blockingEnabled:
+                          description: |-
+                            (Boolean) Provision synchronously.
+                            Provision synchronously.
+                          type: boolean
+                        enabled:
+                          description: |-
+                            (Boolean) Whether the connection can be used. The default is true.
+                            Enabled. The default is `true`.
+                          type: boolean
+                        properties:
+                          additionalProperties:
+                            type: string
+                          description: |-
+                            (Map of String) Authenticator properties, for example ClientId, callbackUrl, Scopes, OAuth2AuthzEPUrl, OAuth2TokenEPUrl, UserInfoUrl (OIDC) or IdPEntityId, SSOUrl, SPEntityId (SAML).
+                            Connector properties, for example `scim2-user-ep`, `scim2-username`.
+                          type: object
+                          x-kubernetes-map-type: granular
+                        rulesEnabled:
+                          description: |-
+                            (Boolean) Apply provisioning rules.
+                            Apply provisioning rules.
+                          type: boolean
+                      type: object
+                    description: '(Attributes Map) Outbound provisioning connectors
+                      keyed by name: SCIM2, scim, googleapps, salesforce. (see below
+                      for nested schema)'
+                    type: object
+                  outboundProvisioningRoles:
+                    description: |-
+                      (Set of String) Only users with these roles are provisioned to this provider.
+                      Only users with these roles are provisioned to this provider.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  roleMappings:
+                    description: (Attributes Set) Provider role to local role mappings.
+                      (see below for nested schema)
+                    items:
+                      properties:
+                        idpRole:
+                          description: |-
+                            (String) Role name sent by the provider.
+                            Role name sent by the provider.
+                          type: string
+                        localRole:
+                          description: |-
+                            (String) Local role, as Internal/<role name> for organization roles (WSO2 silently ignores other formats).
+                            Local role, as `Internal/<role name>` for organization roles (WSO2 silently ignores other formats).
+                          type: string
+                      type: object
+                    type: array
+                  templateId:
+                    description: |-
+                      idp, github-idp, enterprise-oidc-idp or enterprise-saml-idp. The template only changes how the Console shows the connection. The server only accepts it at creation, so changing it replaces the connection.
+                      The Console template, for example `google-idp`, `github-idp`, `enterprise-oidc-idp` or `enterprise-saml-idp`. The template only changes how the Console shows the connection. The server only accepts it at creation, so changing it replaces the connection.
+                    type: string
+                type: object
+              managementPolicies:
+                default:
+                - '*'
+                description: |-
+                  THIS IS A BETA FIELD. It is on by default but can be opted out
+                  through a Crossplane feature flag.
+                  ManagementPolicies specify the array of actions Crossplane is allowed to
+                  take on the managed and external resources.
+                  See the design doc for more information: https://github.com/crossplane/crossplane/blob/499895a25d1a1a0ba1604944ef98ac7a1a71f197/design/design-doc-observe-only-resources.md?plain=1#L223
+                  and this one: https://github.com/crossplane/crossplane/blob/444267e84783136daa93568b364a5f01228cacbe/design/one-pager-ignore-changes.md
+                items:
+                  description: |-
+                    A ManagementAction represents an action that the Crossplane controllers
+                    can take on an external resource.
+                  enum:
+                  - Observe
+                  - Create
+                  - Update
+                  - Delete
+                  - LateInitialize
+                  - '*'
+                  type: string
+                type: array
+              providerConfigRef:
+                default:
+                  kind: ClusterProviderConfig
+                  name: default
+                description: |-
+                  ProviderConfigReference specifies how the provider that will be used to
+                  create, observe, update, and delete this managed resource should be
+                  configured.
+                properties:
+                  kind:
+                    description: Kind of the referenced object.
+                    type: string
+                  name:
+                    description: Name of the referenced object.
+                    type: string
+                required:
+                - kind
+                - name
+                type: object
+              writeConnectionSecretToRef:
+                description: |-
+                  WriteConnectionSecretToReference specifies the namespace and name of a
+                  Secret to which any connection details for this managed resource should
+                  be written. Connection details frequently include the endpoint, username,
+                  and password required to connect to the managed resource.
+                properties:
+                  name:
+                    description: Name of the secret.
+                    type: string
+                required:
+                - name
+                type: object
+            required:
+            - forProvider
+            type: object
+            x-kubernetes-validations:
+            - message: spec.forProvider.name is a required parameter
+              rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.name)
+                || (has(self.initProvider) && has(self.initProvider.name))'
+          status:
+            description: IdentityProviderStatus defines the observed state of IdentityProvider.
+            properties:
+              atProvider:
+                properties:
+                  alias:
+                    description: |-
+                      (String) Alias used as the audience of tokens this provider issues (for example the token endpoint of the resident IdP).
+                      Alias used as the audience of tokens this provider issues (for example the token endpoint of the resident IdP).
+                    type: string
+                  certificates:
+                    description: |-
+                      (List of String) PEM certificates of the provider (for validating signed responses and tokens). Conflicts with jwks_uri.
+                      PEM certificates of the provider (for validating signed responses and tokens). Conflicts with `jwks_uri`.
+                    items:
+                      type: string
+                    type: array
+                  claims:
+                    description: (Attributes) Claim mappings from the provider's attributes
+                      to local claims. (see below for nested schema)
+                    properties:
+                      mappings:
+                        description: (Attributes Set) Provider claim to local claim
+                          mappings. Without mappings the provider's claims are used
+                          as is. (see below for nested schema)
+                        items:
+                          properties:
+                            idpClaim:
+                              description: |-
+                                (String) Claim name used by the provider.
+                                Claim name used by the provider.
+                              type: string
+                            localClaim:
+                              description: |-
+                                (String) Local claim URI.
+                                Local claim URI.
+                              type: string
+                          type: object
+                        type: array
+                      provisioningClaims:
+                        description: (Attributes Set) Default values of claims for
+                          outbound provisioning. (see below for nested schema)
+                        items:
+                          properties:
+                            claim:
+                              description: |-
+                                (String) Claim URI.
+                                Claim URI.
+                              type: string
+                            defaultValue:
+                              description: |-
+                                (String) Default value.
+                                Default value.
+                              type: string
+                          type: object
+                        type: array
+                      roleClaim:
+                        description: |-
+                          (String) Provider claim that carries roles.
+                          Provider claim that carries roles.
+                        type: string
+                      userIdClaim:
+                        description: |-
+                          (String) The identity provider's claim that identifies the user. When it is empty, the server uses the subject.
+                          The identity provider's claim that identifies the user. When it is empty, the server uses the subject.
+                        type: string
+                    type: object
+                  defaultAuthenticator:
+                    description: |-
+                      (String) Name of the federated authenticator used by default. The default is the only (or first) configured authenticator.
+                      Name of the federated authenticator used by default. The default is the only (or first) configured authenticator.
+                    type: string
+                  defaultOutboundConnector:
+                    description: |-
+                      (String) Name of the default outbound provisioning connector.
+                      Name of the default outbound provisioning connector.
+                    type: string
+                  description:
+                    description: |-
+                      (String) Description.
+                      Description.
+                    type: string
+                  enabled:
+                    description: |-
+                      (Boolean) Whether the connection can be used. The default is true.
+                      Whether the connection can be used. The default is `true`.
+                    type: boolean
+                  federatedAuthenticators:
+                    additionalProperties:
+                      properties:
+                        enabled:
+                          description: |-
+                            (Boolean) Whether the connection can be used. The default is true.
+                            Whether the authenticator is enabled. The default is `true`.
+                          type: boolean
+                        endpoint:
+                          description: (Attributes) External service endpoint of a
+                            custom (user defined) federated authenticator. (see below
+                            for nested schema)
+                          properties:
+                            authenticationType:
+                              description: |-
+                                (String) NONE, BASIC, BEARER or API_KEY.
+                                `NONE`, `BASIC`, `BEARER` or `API_KEY`.
+                              type: string
+                            uri:
+                              description: |-
+                                (String) HTTPS endpoint.
+                                HTTPS endpoint.
+                              type: string
+                          type: object
+                        properties:
+                          additionalProperties:
+                            type: string
+                          description: |-
+                            (Map of String) Authenticator properties, for example ClientId, callbackUrl, Scopes, OAuth2AuthzEPUrl, OAuth2TokenEPUrl, UserInfoUrl (OIDC) or IdPEntityId, SSOUrl, SPEntityId (SAML).
+                            Authenticator properties, for example `ClientId`, `callbackUrl`, `Scopes`, `OAuth2AuthzEPUrl`, `OAuth2TokenEPUrl`, `UserInfoUrl` (OIDC) or `IdPEntityId`, `SSOUrl`, `SPEntityId` (SAML).
+                          type: object
+                          x-kubernetes-map-type: granular
+                      type: object
+                    description: '(Attributes Map) Federated authenticators, keyed
+                      by authenticator name: GoogleOIDCAuthenticator, GithubAuthenticator,
+                      FacebookAuthenticator, MicrosoftWindowsLiveAuthenticator, Office365Authenticator,
+                      AppleOIDCAuthenticator, TwitterAuthenticator, OpenIDConnectAuthenticator,
+                      SAMLSSOAuthenticator, PassiveSTSAuthenticator, IWAKerberosAuthenticator,
+                      EmailOTP, SMSOTP, or a custom authenticator. (see below for
+                      nested schema)'
+                    type: object
+                  forceDelete:
+                    description: |-
+                      (Boolean) Delete the connection even when applications still use it. The default is false.
+                      Delete the connection even when applications still use it. The default is `false`.
+                    type: boolean
+                  groups:
+                    description: |-
+                      (Set of String) Groups defined at the provider that can be mapped to local roles.
+                      Groups defined at the provider that can be mapped to local roles.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  homeRealmIdentifier:
+                    description: |-
+                      (String) Home realm identifier (fidp request parameter value) that selects this provider.
+                      Home realm identifier (`fidp` request parameter value) that selects this provider.
+                    type: string
+                  id:
+                    description: (String) Identity provider ID.
+                    type: string
+                  idpIssuerName:
+                    description: |-
+                      (String) Issuer of tokens from this provider, when different from its name (used to validate JWT bearer grants).
+                      Issuer of tokens from this provider, when different from its name (used to validate JWT bearer grants).
+                    type: string
+                  imageUrl:
+                    description: |-
+                      (String) Logo URL.
+                      Logo URL.
+                    type: string
+                  implicitAssociation:
+                    description: (Attributes) Associate federated users with local
+                      users that have matching attributes. (see below for nested schema)
+                    properties:
+                      enabled:
+                        description: |-
+                          (Boolean) Whether the connection can be used. The default is true.
+                          Enable implicit association. The default is `false`.
+                        type: boolean
+                      lookupAttributes:
+                        description: |-
+                          (List of String) Local claim URIs used to find the local user.
+                          Local claim URIs used to find the local user.
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                  isFederationHub:
+                    description: |-
+                      (Boolean) The provider is a federation hub (it fronts other providers). The default is false.
+                      The provider is a federation hub (it fronts other providers). The default is `false`.
+                    type: boolean
+                  isPrimary:
+                    description: |-
+                      (Boolean) Use as the primary (default) identity provider. The default is false.
+                      Use as the primary (default) identity provider. The default is `false`.
+                    type: boolean
+                  jitProvisioning:
+                    description: in-time provisioning of local accounts for federated
+                      users. (see below for nested schema)
+                    properties:
+                      accountLookupAttributeMappings:
+                        description: (Attributes List) Local and federated attributes
+                          used to find an existing local user. (see below for nested
+                          schema)
+                        items:
+                          properties:
+                            federatedAttribute:
+                              description: |-
+                                (String) Provider claim.
+                                Provider claim.
+                              type: string
+                            localAttribute:
+                              description: |-
+                                (String) Local claim URI.
+                                Local claim URI.
+                              type: string
+                          type: object
+                        type: array
+                      associateLocalUser:
+                        description: |-
+                          (Boolean) Link to an existing local user found through the lookup attributes. The default is false.
+                          Link to an existing local user found through the lookup attributes. The default is `false`.
+                        type: boolean
+                      attributeSyncMethod:
+                        description: |-
+                          (String) OVERRIDE_ALL, PRESERVE_LOCAL or NONE. The default is OVERRIDE_ALL.
+                          `OVERRIDE_ALL`, `PRESERVE_LOCAL` or `NONE`. The default is `OVERRIDE_ALL`.
+                        type: string
+                      enabled:
+                        description: |-
+                          (Boolean) Whether the connection can be used. The default is true.
+                          Create local users on first login. The default is `false`.
+                        type: boolean
+                      idpGroupSyncMethod:
+                        description: |-
+                          (String) MERGE_WITH_EXISTING or OVERRIDE_ALL. The default is MERGE_WITH_EXISTING.
+                          `MERGE_WITH_EXISTING` or `OVERRIDE_ALL`. The default is `MERGE_WITH_EXISTING`.
+                        type: string
+                      scheme:
+                        description: |-
+                          (String) PROVISION_SILENTLY, PROMPT_CONSENT, PROMPT_PASSWORD_CONSENT or PROMPT_USERNAME_PASSWORD_CONSENT. The default is PROVISION_SILENTLY.
+                          `PROVISION_SILENTLY`, `PROMPT_CONSENT`, `PROMPT_PASSWORD_CONSENT` or `PROMPT_USERNAME_PASSWORD_CONSENT`. The default is `PROVISION_SILENTLY`.
+                        type: string
+                      skipJitForLookupFailure:
+                        description: |-
+                          (Boolean) Skip provisioning when the local user lookup fails. The default is false.
+                          Skip provisioning when the local user lookup fails. The default is `false`.
+                        type: boolean
+                      userStore:
+                        description: |-
+                          (String) User store for provisioned users. The default is PRIMARY.
+                          User store for provisioned users. The default is `PRIMARY`.
+                        type: string
+                    type: object
+                  jwksUri:
+                    description: |-
+                      (String) JWKS endpoint used to validate tokens signed by the provider. Conflicts with certificates.
+                      JWKS endpoint used to validate tokens signed by the provider. Conflicts with `certificates`.
+                    type: string
+                  name:
+                    description: |-
+                      (String) Unique name, used in authentication steps.
+                      Unique name, used in authentication steps.
+                    type: string
+                  outboundProvisioningConnectors:
+                    additionalProperties:
+                      properties:
+                        blockingEnabled:
+                          description: |-
+                            (Boolean) Provision synchronously.
+                            Provision synchronously.
+                          type: boolean
+                        enabled:
+                          description: |-
+                            (Boolean) Whether the connection can be used. The default is true.
+                            Enabled. The default is `true`.
+                          type: boolean
+                        properties:
+                          additionalProperties:
+                            type: string
+                          description: |-
+                            (Map of String) Authenticator properties, for example ClientId, callbackUrl, Scopes, OAuth2AuthzEPUrl, OAuth2TokenEPUrl, UserInfoUrl (OIDC) or IdPEntityId, SSOUrl, SPEntityId (SAML).
+                            Connector properties, for example `scim2-user-ep`, `scim2-username`.
+                          type: object
+                          x-kubernetes-map-type: granular
+                        rulesEnabled:
+                          description: |-
+                            (Boolean) Apply provisioning rules.
+                            Apply provisioning rules.
+                          type: boolean
+                      type: object
+                    description: '(Attributes Map) Outbound provisioning connectors
+                      keyed by name: SCIM2, scim, googleapps, salesforce. (see below
+                      for nested schema)'
+                    type: object
+                  outboundProvisioningRoles:
+                    description: |-
+                      (Set of String) Only users with these roles are provisioned to this provider.
+                      Only users with these roles are provisioned to this provider.
+                    items:
+                      type: string
+                    type: array
+                    x-kubernetes-list-type: set
+                  roleMappings:
+                    description: (Attributes Set) Provider role to local role mappings.
+                      (see below for nested schema)
+                    items:
+                      properties:
+                        idpRole:
+                          description: |-
+                            (String) Role name sent by the provider.
+                            Role name sent by the provider.
+                          type: string
+                        localRole:
+                          description: |-
+                            (String) Local role, as Internal/<role name> for organization roles (WSO2 silently ignores other formats).
+                            Local role, as `Internal/<role name>` for organization roles (WSO2 silently ignores other formats).
+                          type: string
+                      type: object
+                    type: array
+                  templateId:
+                    description: |-
+                      idp, github-idp, enterprise-oidc-idp or enterprise-saml-idp. The template only changes how the Console shows the connection. The server only accepts it at creation, so changing it replaces the connection.
+                      The Console template, for example `google-idp`, `github-idp`, `enterprise-oidc-idp` or `enterprise-saml-idp`. The template only changes how the Console shows the connection. The server only accepts it at creation, so changing it replaces the connection.
+                    type: string
+                type: object
+              conditions:
+                description: Conditions of the resource.
+                items:
+                  description: A Condition that may apply to a resource.
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        LastTransitionTime is the last time this condition transitioned from one
+                        status to another.
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        A Message containing details about this condition's last transition from
+                        one status to another, if any.
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        ObservedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      type: integer
+                    reason:
+                      description: A Reason for this condition's last transition from
+                        one status to another.
+                      type: string
+                    status:
+                      description: Status of this condition; is it currently True,
+                        False, or Unknown?
+                      type: string
+                    type:
+                      description: |-
+                        Type of this condition. At most one of each condition type may apply to
+                        a resource at any point in time.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              lastHandledReconcileAt:
+                description: |-
+                  LastHandledReconcileAt holds the value of the most recent
+                  reconcile-requested-at annotation token that the controller has
+                  processed. Users can compare this to the annotation to determine
+                  whether a reconcile request has been handled.
+                type: string
+              observedGeneration:
+                description: |-
+                  ObservedGeneration is the latest metadata.generation
+                  which resulted in either a ready state, or stalled due to error
+                  it can not recover from without human intervention.
+                format: int64
+                type: integer
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

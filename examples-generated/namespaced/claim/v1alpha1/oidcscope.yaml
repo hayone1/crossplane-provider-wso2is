@@ -1,0 +1,38 @@
+apiVersion: claim.wso2is.m.crossplane.io/v1alpha1
+kind: OIDCScope
+metadata:
+  annotations:
+    meta.upbound.io/example-id: claim/v1alpha1/oidcscope
+  labels:
+    testing.upbound.io/example-name: contact
+  name: contact
+  namespace: default
+spec:
+  forProvider:
+    claimsRefs:
+    - name: example
+    - name: example
+    description: Email address and phone number
+    displayName: Contact details
+    name: contact
+
+---
+
+apiVersion: claim.wso2is.m.crossplane.io/v1alpha1
+kind: ExternalClaim
+metadata:
+  annotations:
+    meta.upbound.io/example-id: claim/v1alpha1/oidcscope
+  labels:
+    testing.upbound.io/example-name: department
+  name: department
+  namespace: default
+spec:
+  forProvider:
+    claimUri: department
+    dialectUriSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    mappedLocalClaimUriSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example

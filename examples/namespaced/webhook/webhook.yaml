@@ -1,0 +1,25 @@
+# Sends login and user events to your endpoint. The server signs each event with the
+# secret from the Secret.
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: default
+  name: audit-webhook
+stringData:
+  secret: replace-with-a-long-random-secret
+---
+apiVersion: webhook.wso2is.m.crossplane.io/v1alpha1
+kind: Webhook
+metadata:
+  namespace: default
+  name: audit
+spec:
+  forProvider:
+    name: Audit events
+    endpoint: https://hooks.example.com/wso2is
+    channels:
+      - https://schemas.identity.wso2.org/events/login
+      - https://schemas.identity.wso2.org/events/user
+    secretSecretRef:
+      name: audit-webhook
+      key: secret

@@ -1,0 +1,43 @@
+# The complete member list of a group. The provider removes members that the list does
+# not name, so use only one GroupMembers for each group.
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: default
+  name: bob-password
+stringData:
+  password: Change-Me-Passw0rd!
+---
+apiVersion: identity.wso2is.m.crossplane.io/v1alpha1
+kind: GroupMembers
+metadata:
+  namespace: default
+  name: reviewers
+spec:
+  forProvider:
+    groupIdRef:
+      name: reviewers
+    userIdsRefs:
+      - name: bob
+---
+apiVersion: identity.wso2is.m.crossplane.io/v1alpha1
+kind: Group
+metadata:
+  namespace: default
+  name: reviewers
+spec:
+  forProvider:
+    name: reviewers
+---
+apiVersion: identity.wso2is.m.crossplane.io/v1alpha1
+kind: User
+metadata:
+  namespace: default
+  name: bob
+spec:
+  forProvider:
+    username: bob
+    email: bob@example.com
+    passwordSecretRef:
+      name: bob-password
+      key: password

@@ -1,0 +1,59 @@
+apiVersion: application.wso2is.m.crossplane.io/v1alpha1
+kind: AuthorizedAPI
+metadata:
+  annotations:
+    meta.upbound.io/example-id: application/v1alpha1/authorizedapi
+  labels:
+    testing.upbound.io/example-name: orders
+  name: orders
+  namespace: default
+spec:
+  forProvider:
+    apiResourceIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: orders
+    applicationIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: backend
+    scopes:
+    - orders:read
+    - orders:write
+
+---
+
+apiVersion: application.wso2is.m.crossplane.io/v1alpha1
+kind: APIResource
+metadata:
+  annotations:
+    meta.upbound.io/example-id: application/v1alpha1/authorizedapi
+  labels:
+    testing.upbound.io/example-name: orders
+  name: orders
+  namespace: default
+spec:
+  forProvider:
+    identifier: https://api.example.com/orders
+    name: Orders API
+    scopes:
+    - displayName: Read orders
+      name: orders:read
+    - displayName: Change orders
+      name: orders:write
+
+---
+
+apiVersion: application.wso2is.m.crossplane.io/v1alpha1
+kind: Application
+metadata:
+  annotations:
+    meta.upbound.io/example-id: application/v1alpha1/authorizedapi
+  labels:
+    testing.upbound.io/example-name: backend
+  name: backend
+  namespace: default
+spec:
+  forProvider:
+    name: Order Processor
+    oidc:
+      grantTypes:
+      - client_credentials

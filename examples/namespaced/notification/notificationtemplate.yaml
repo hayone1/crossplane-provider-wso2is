@@ -1,0 +1,14 @@
+# A French version of the account confirmation email. When you delete the managed
+# resource, the server goes back to the system template.
+apiVersion: notification.wso2is.m.crossplane.io/v1alpha1
+kind: NotificationTemplate
+metadata:
+  namespace: default
+  name: account-confirmation-fr
+spec:
+  forProvider:
+    channel: email
+    type: AccountConfirmation
+    locale: fr_FR
+    subject: Confirmez votre compte
+    body: '<p>Bonjour {{user-name}}, confirmez votre compte : <a href="{{carbon.product-url}}/accountrecoveryendpoint/confirmregistration.do?confirmation={{confirmation-code}}">confirmer</a></p>'

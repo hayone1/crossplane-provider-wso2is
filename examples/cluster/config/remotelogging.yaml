@@ -1,0 +1,24 @@
+# Sends audit logs to a remote server with basic authentication. When you delete the
+# managed resource, the server stops sending the logs.
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: crossplane-system
+  name: remote-logging-password
+stringData:
+  password: replace-with-your-password
+---
+apiVersion: config.wso2is.crossplane.io/v1alpha1
+kind: RemoteLogging
+metadata:
+  name: audit
+spec:
+  forProvider:
+    logType: AUDIT
+    remoteUrl: https://logs.example.com/wso2is/audit
+    connectTimeoutMillis: "5000"
+    username: wso2is
+    passwordSecretRef:
+      namespace: crossplane-system
+      name: remote-logging-password
+      key: password

@@ -1,0 +1,41 @@
+apiVersion: vc.wso2is.m.crossplane.io/v1alpha1
+kind: VCTemplate
+metadata:
+  annotations:
+    meta.upbound.io/example-id: vc/v1alpha1/vctemplate
+  labels:
+    testing.upbound.io/example-name: employee_badge
+  name: employee-badge
+  namespace: default
+spec:
+  forProvider:
+    claims:
+      department: ${wso2is_external_claim.department_vc.claim_uri}
+      email: email
+      family_name: family_name
+      given_name: given_name
+    displayName: Employee badge
+    expiresIn: 31536000
+    format: dc+sd-jwt
+    identifier: EmployeeBadge
+
+---
+
+apiVersion: claim.wso2is.m.crossplane.io/v1alpha1
+kind: ExternalClaim
+metadata:
+  annotations:
+    meta.upbound.io/example-id: vc/v1alpha1/vctemplate
+  labels:
+    testing.upbound.io/example-name: department_vc
+  name: department-vc
+  namespace: default
+spec:
+  forProvider:
+    claimUri: department
+    dialectUriSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    mappedLocalClaimUriSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example

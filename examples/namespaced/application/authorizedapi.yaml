@@ -1,0 +1,42 @@
+# A machine-to-machine (M2M) application that may call the Orders API with two scopes.
+apiVersion: application.wso2is.m.crossplane.io/v1alpha1
+kind: AuthorizedAPI
+metadata:
+  namespace: default
+  name: order-processor-orders
+spec:
+  forProvider:
+    applicationIdRef:
+      name: order-processor
+    apiResourceIdRef:
+      name: order-processor-api
+    scopes:
+      - orders:read
+      - orders:write
+---
+apiVersion: application.wso2is.m.crossplane.io/v1alpha1
+kind: Application
+metadata:
+  namespace: default
+  name: order-processor
+spec:
+  forProvider:
+    name: Order Processor
+    oidc:
+      grantTypes:
+        - client_credentials
+---
+apiVersion: application.wso2is.m.crossplane.io/v1alpha1
+kind: APIResource
+metadata:
+  namespace: default
+  name: order-processor-api
+spec:
+  forProvider:
+    name: Order Processor API
+    identifier: https://api.example.com/order-processor
+    scopes:
+      - name: orders:read
+        displayName: Read orders
+      - name: orders:write
+        displayName: Change orders

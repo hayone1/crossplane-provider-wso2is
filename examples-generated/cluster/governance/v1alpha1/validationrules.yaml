@@ -1,0 +1,31 @@
+apiVersion: governance.wso2is.crossplane.io/v1alpha1
+kind: ValidationRules
+metadata:
+  annotations:
+    meta.upbound.io/example-id: governance/v1alpha1/validationrules
+  labels:
+    testing.upbound.io/example-name: password
+  name: password
+spec:
+  forProvider:
+    field: password
+    rules:
+    - properties:
+        max.length: "64"
+        min.length: "12"
+      validator: LengthValidator
+    - properties:
+        min.length: "1"
+      validator: NumeralValidator
+    - properties:
+        min.length: "1"
+      validator: UpperCaseValidator
+    - properties:
+        min.length: "1"
+      validator: LowerCaseValidator
+    - properties:
+        min.length: "1"
+      validator: SpecialCharacterValidator
+    - properties:
+        max.consecutive.character: "3"
+      validator: RepeatedCharacterValidator

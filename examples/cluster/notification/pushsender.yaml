@@ -1,0 +1,24 @@
+# Push notifications through Firebase Cloud Messaging. The Secret holds the service
+# account key file of your Firebase project.
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: crossplane-system
+  name: fcm-service-account
+stringData:
+  service-account.json: |
+    {"type": "service_account", "project_id": "replace-me", "client_email": "push@replace-me.iam.gserviceaccount.com", "private_key": "replace-me"}
+---
+apiVersion: notification.wso2is.crossplane.io/v1alpha1
+kind: PushSender
+metadata:
+  name: fcm
+spec:
+  forProvider:
+    providerName: FCM
+    default: true
+    fcm:
+      serviceAccountJsonSecretRef:
+        namespace: crossplane-system
+        name: fcm-service-account
+        key: service-account.json

@@ -1,0 +1,13 @@
+apiVersion: config.wso2is.m.crossplane.io/v1alpha1
+kind: SAMLIdPConfiguration
+metadata:
+  annotations:
+    meta.upbound.io/example-id: config/v1alpha1/samlidpconfiguration
+  labels:
+    testing.upbound.io/example-name: this
+  name: this
+  namespace: default
+spec:
+  forProvider:
+    enableMetadataSigning: true
+    metadataValidityPeriod: 120

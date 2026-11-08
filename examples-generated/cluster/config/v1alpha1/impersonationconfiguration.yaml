@@ -1,0 +1,11 @@
+apiVersion: config.wso2is.crossplane.io/v1alpha1
+kind: ImpersonationConfiguration
+metadata:
+  annotations:
+    meta.upbound.io/example-id: config/v1alpha1/impersonationconfiguration
+  labels:
+    testing.upbound.io/example-name: this
+  name: this
+spec:
+  forProvider:
+    enableEmailNotification: true

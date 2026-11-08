@@ -1,0 +1,18 @@
+apiVersion: script.wso2is.m.crossplane.io/v1alpha1
+kind: ScriptLibrary
+metadata:
+  annotations:
+    meta.upbound.io/example-id: script/v1alpha1/scriptlibrary
+  labels:
+    testing.upbound.io/example-name: risk
+  name: risk
+  namespace: default
+spec:
+  forProvider:
+    content: |
+      function isRisky(score) {
+        return score > 70;
+      }
+      module.exports.isRisky = isRisky;
+    description: Risk helpers for adaptive authentication
+    name: risk.js

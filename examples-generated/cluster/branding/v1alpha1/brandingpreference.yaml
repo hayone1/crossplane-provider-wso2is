@@ -1,0 +1,27 @@
+apiVersion: branding.wso2is.crossplane.io/v1alpha1
+kind: BrandingPreference
+metadata:
+  annotations:
+    meta.upbound.io/example-id: branding/v1alpha1/brandingpreference
+  labels:
+    testing.upbound.io/example-name: org
+  name: org
+spec:
+  forProvider:
+    locale: en-US
+    preference: |-
+      ${jsonencode({
+          configs = { isBrandingEnabled = true }
+          organizationDetails = {
+            displayName  = "Acme"
+            supportEmail = "support@acme.example"
+          }
+          images = {
+            logo = { imgURL = "https://cdn.acme.example/logo.svg", altText = "Acme" }
+          }
+          theme = {
+            activeTheme = "LIGHT"
+            LIGHT       = { colors = { primary = { main = "#FF7300" } } }
+          }
+          layout = { activeLayout = "centered" }
+        })}

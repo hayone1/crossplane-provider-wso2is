@@ -1,0 +1,31 @@
+# An approval workflow with two steps. Users with the first role approve first, and users
+# with the second role approve next.
+apiVersion: workflow.wso2is.crossplane.io/v1alpha1
+kind: Workflow
+metadata:
+  name: role-changes
+spec:
+  forProvider:
+    name: Role changes
+    description: Changes to roles need two approvals
+    steps:
+      - roleIdsRefs:
+          - name: approvers-team-leads
+      - roleIdsRefs:
+          - name: approvers-security
+---
+apiVersion: identity.wso2is.crossplane.io/v1alpha1
+kind: Role
+metadata:
+  name: approvers-team-leads
+spec:
+  forProvider:
+    name: team-leads
+---
+apiVersion: identity.wso2is.crossplane.io/v1alpha1
+kind: Role
+metadata:
+  name: approvers-security
+spec:
+  forProvider:
+    name: security-officers

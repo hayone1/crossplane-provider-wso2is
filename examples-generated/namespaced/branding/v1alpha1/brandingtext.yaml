@@ -1,0 +1,16 @@
+apiVersion: branding.wso2is.m.crossplane.io/v1alpha1
+kind: BrandingText
+metadata:
+  annotations:
+    meta.upbound.io/example-id: branding/v1alpha1/brandingtext
+  labels:
+    testing.upbound.io/example-name: login
+  name: login
+  namespace: default
+spec:
+  forProvider:
+    locale: en-US
+    screen: login
+    text:
+      login.button: Continue
+      login.heading: Sign in to Acme

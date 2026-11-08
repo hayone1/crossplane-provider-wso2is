@@ -1,0 +1,25 @@
+apiVersion: action.wso2is.m.crossplane.io/v1alpha1
+kind: Action
+metadata:
+  annotations:
+    meta.upbound.io/example-id: action/v1alpha1/action
+  labels:
+    testing.upbound.io/example-name: token_claims
+  name: token-claims
+  namespace: default
+spec:
+  forProvider:
+    allowedHeaders:
+    - x-request-id
+    authenticationPropertiesSecretRef:
+      key: example-key
+      name: example-secret
+    authenticationType: API_KEY
+    endpointUri: https://hooks.example.com/pre-issue-access-token
+    name: Add tenant claims
+    rules:
+    - expressions:
+      - field: grantType
+        operator: equals
+        value: client_credentials
+    type: pre_issue_access_token

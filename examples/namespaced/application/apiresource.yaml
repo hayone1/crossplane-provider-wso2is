@@ -1,0 +1,17 @@
+# Your own API. Applications that you authorize for it can request its scopes.
+apiVersion: application.wso2is.m.crossplane.io/v1alpha1
+kind: APIResource
+metadata:
+  namespace: default
+  name: orders
+spec:
+  forProvider:
+    name: Orders API
+    description: Order management
+    identifier: https://api.example.com/orders
+    scopes:
+      - name: orders:read
+        displayName: Read orders
+      - name: orders:write
+        displayName: Change orders
+        description: Create and update orders

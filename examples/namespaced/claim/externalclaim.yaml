@@ -1,0 +1,25 @@
+# Makes a custom user attribute available to OpenID Connect applications as the claim
+# "member_number".
+apiVersion: claim.wso2is.m.crossplane.io/v1alpha1
+kind: ExternalClaim
+metadata:
+  namespace: default
+  name: member-number-oidc
+spec:
+  forProvider:
+    dialectUri: http://wso2.org/oidc/claim
+    claimUri: member_number
+    mappedLocalClaimUriRef:
+      name: member-number
+---
+apiVersion: claim.wso2is.m.crossplane.io/v1alpha1
+kind: Claim
+metadata:
+  namespace: default
+  name: member-number
+spec:
+  forProvider:
+    claimUri: http://wso2.org/claims/memberNumber
+    displayName: Member number
+    attributeMappings:
+      PRIMARY: memberNumber

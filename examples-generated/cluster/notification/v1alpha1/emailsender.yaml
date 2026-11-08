@@ -1,0 +1,23 @@
+apiVersion: notification.wso2is.crossplane.io/v1alpha1
+kind: EmailSender
+metadata:
+  annotations:
+    meta.upbound.io/example-id: notification/v1alpha1/emailsender
+  labels:
+    testing.upbound.io/example-name: smtp
+  name: smtp
+spec:
+  forProvider:
+    displayName: Acme
+    fromAddress: no-reply@acme.com
+    passwordSecretRef:
+      key: example-key
+      name: example-secret
+      namespace: upbound-system
+    properties:
+      mail.smtp.starttls.enable: "true"
+    provider: ${wso2is.acme}
+    replyTo: support@acme.com
+    smtpHost: smtp.sendgrid.net
+    smtpPort: 587
+    username: apikey

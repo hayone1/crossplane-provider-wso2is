@@ -1,0 +1,15 @@
+# A ProviderConfig for one namespace. Namespaced managed resources in the namespace
+# "default" use it when they set providerConfigRef to {kind: ProviderConfig, name: default}.
+# It may only read a Secret in its own namespace.
+apiVersion: wso2is.m.crossplane.io/v1beta1
+kind: ProviderConfig
+metadata:
+  namespace: default
+  name: default
+spec:
+  credentials:
+    source: Secret
+    secretRef:
+      namespace: default
+      name: wso2is-creds
+      key: credentials
