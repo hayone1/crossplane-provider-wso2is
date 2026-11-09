@@ -76,6 +76,17 @@ remain). The repository is on GitHub with its first commit. The Upjet bug is rep
 
 ## Done this session
 
+* `/test-examples` works (2026-11-09): the secret `UPTEST_CLOUD_CREDENTIALS` holds the lab
+  credentials JSON, and `/test-examples="examples/cluster/identity/group.yaml,examples/namespaced/identity/role.yaml"`
+  on PR #5 passed apply, import and delete; the lab was clean afterwards. A run with the
+  cluster-scoped and namespaced Group together fails with HTTP 409 (same group name on the
+  server); `contributing/development.md` says so. If the lab is destroyed, update or delete
+  that secret. The first comment was lost in a GitHub Actions incident; post it again when no
+  run starts.
+* Removed `install: true` from `docker/setup-buildx-action` in both repositories (this repo
+  PR #5, Hostinger PR #12; `ci:` commits, so no release).
+* `.env` now also holds `XPKG_MIRROR_ACCESS_ID` and `XPKG_MIRROR_TOKEN` (the Hostinger robot).
+
 * **v0.1.0 is published** (2026-11-09): `ghcr.io/hayone1/provider-wso2is:v0.1.0` and
   `xpkg.upbound.io/codejourney/provider-wso2is:v0.1.0`, the same digest, signed in both
   registries, release https://github.com/hayone1/crossplane-provider-wso2is/releases/tag/v0.1.0.
@@ -117,9 +128,7 @@ remain). The repository is on GitHub with its first commit. The Upjet bug is rep
 
 ## Open items
 
-1. `/test-examples` needs the secret `UPTEST_CLOUD_CREDENTIALS` (optional). The release
-   workflow warns that `docker/setup-buildx-action` v4 no longer has the `install` input
-   (harmless; Hostinger has the same line).
+1. Nothing is needed for publishing or `/test-examples` any more (see "Done this session").
 2. When Upjet fixes issue 810, consider replacing the identity provider workaround in
    `config/idp.go`. That changes the CRD fields, so it needs a new API version or a breaking
    change note.
