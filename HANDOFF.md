@@ -5,7 +5,7 @@ before you stop (see the `session-handoff` skill). Never put secret values here.
 
 ## Last updated
 
-2026-11-08 (third session): the provider now uses terraform-provider-wso2is v0.1.2, which
+2026-11-09 (fourth session): v0.1.0 published (GHCR, Upbound Marketplace), uptest local only, lab destroyed. Earlier, 2026-11-08 (third session): the provider now uses terraform-provider-wso2is v0.1.2, which
 contains the fixes found here, so the read guard is gone (only the configuration checks
 remain). The repository is on GitHub with its first commit. The Upjet bug is reported upstream.
 
@@ -53,11 +53,12 @@ remain). The repository is on GitHub with its first commit. The Upjet bug is rep
 
 ## Environment
 
-* **WSO2 IS 7.3.0 lab: running** at `https://wso2is.lab.software-cloud.com` (Hetzner, about
-  EUR 42 a month). The admin credentials are in `.env` (`WSO2IS_BASE_URL`, `WSO2IS_USERNAME`,
-  `WSO2IS_PASSWORD`). Lab commands run from `../terraform-provider-wso2is` with Task. Ask the
-  user before you destroy it. The lab was clean at the end of the session (no test tenants,
-  organizations, applications or identity providers).
+* **WSO2 IS 7.3.0 lab: destroyed** on 2026-11-09 at the user's request (`task lab:destroy` in
+  `../terraform-provider-wso2is`; Terraform state empty, DNS name gone). It was clean before.
+  `.env` now points at the local Docker server (`task wso2:up` there, `https://localhost:9443`,
+  admin/admin, `WSO2IS_INSECURE_SKIP_VERIFY=true`), for both `test/e2e/run.sh` and
+  `UPTEST_CLOUD_CREDENTIALS`. `task lab:up -- -auto-approve` recreates the lab in about ten
+  minutes, with a new admin password (ask the user first: it costs about EUR 42 a month).
 * **Memory:** WSL has 6 GB (`.wslconfig`). Building the 104 generated packages with two
   parallel compile jobs crashed WSL twice. Run heavy Go commands through
   `_debug/scripts/lowmem` (one compile job, hard 3 GB cap through `systemd-run`; set
