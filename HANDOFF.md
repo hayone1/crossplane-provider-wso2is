@@ -55,9 +55,9 @@ remain). The repository is on GitHub with its first commit. The Upjet bug is rep
 
 * **WSO2 IS 7.3.0 lab: destroyed** on 2026-11-09 at the user's request (`task lab:destroy` in
   `../terraform-provider-wso2is`; Terraform state empty, DNS name gone). It was clean before.
-  `.env` now points at the local Docker server (`task wso2:up` there, `https://localhost:9443`,
-  admin/admin, `WSO2IS_INSECURE_SKIP_VERIFY=true`), for both `test/e2e/run.sh` and
-  `UPTEST_CLOUD_CREDENTIALS`. `task lab:up -- -auto-approve` recreates the lab in about ten
+  `.env` now points at the Docker server from `make wso2.up` (`compose.yaml`): `WSO2IS_*` use
+  `https://localhost:9443`, and `UPTEST_CLOUD_CREDENTIALS` uses `https://wso2is:9443` (the
+  container joins kind's network under that name, because inside a pod localhost is the pod). `task lab:up -- -auto-approve` recreates the lab in about ten
   minutes, with a new admin password (ask the user first: it costs about EUR 42 a month).
 * **Memory:** WSL has 6 GB (`.wslconfig`). Building the 104 generated packages with two
   parallel compile jobs crashed WSL twice. Run heavy Go commands through
@@ -76,6 +76,15 @@ remain). The repository is on GitHub with its first commit. The Upjet bug is rep
   Crossplane CLI v2.2.1 and Terraform 1.5.7 into `.cache/tools`.
 
 ## Done this session
+
+* **`compose.yaml` + `make wso2.up` / `make wso2.down`** (2026-11-09, PR #7): WSO2 IS 7.3.0 in
+  Docker, the same image as CI (`e2e-docker.yml` now uses `make wso2.up`; Dependabot proposes
+  patch updates of the image). The user does not want WSO2 run on their PC; test on a temporary
+  Hetzner VM instead (HCLOUD_TOKEN in `../terraform-provider-wso2is/.env`; delete the VM and
+  its SSH key afterwards). On a `cpx42` VM: `make wso2.up` without a kind network, `test/e2e/run.sh`
+  with a cluster Group, a namespaced Claim and the tenant EmailSender, `make e2e` with a cluster
+  Group and a namespaced Role, and `make wso2.down` all passed (log:
+  `_debug/compose-vm-tests.log`). VM and key deleted. `cpx41` is no longer offered in fsn1/nbg1.
 
 * **uptest runs locally only** (2026-11-09, at the user's request, because the lab will be
   destroyed). The `/test-examples` workflow (`e2e.yaml`) and the secret
