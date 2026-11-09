@@ -126,7 +126,10 @@ Test both copies with `test/e2e/run.sh`.
 * `e2e-docker.yml` runs every example against WSO2 IS 7.3.0 in Docker, in both API variants.
 * `e2e.yaml` runs uptest against your own server when a maintainer comments `/test-examples` on
   a pull request. It needs the repository secret `UPTEST_CLOUD_CREDENTIALS`, which holds a
-  credentials JSON object.
+  credentials JSON object. List the examples in quotes, separated by commas, for example
+  `/test-examples="examples/cluster/identity/group.yaml"`. Do not test the cluster-scoped and
+  the namespaced example of the same kind in one run. They create objects with the same names
+  on the server, so the second one fails with HTTP 409.
 * `security.yml` runs govulncheck, CodeQL, gitleaks and the dependency review. `scorecard.yml`
   runs the OpenSSF Scorecard.
 * `release.yml` publishes a release after CI passes on `main`. The version follows from the
