@@ -83,10 +83,10 @@ remain). The repository is on GitHub with its first commit. The Upjet bug is rep
   early when it or `UPTEST_EXAMPLE_LIST` is missing. `make e2e UPTEST_EXAMPLE_LIST=examples/cluster/identity/group.yaml,examples/namespaced/identity/role.yaml`
   passed apply, import and delete against the lab (log: `_debug/uptest-local.log`). Do not test
   the cluster-scoped and namespaced example of one kind together: same server names, HTTP 409.
-* Icon: `extensions/icons/icon.svg` is in the v0.1.0 package (extensions image, checked). The
-  Marketplace page `marketplace.upbound.io/providers/codejourney/provider-wso2is` returned 404
-  on 2026-11-09; the user has to turn on Publish (Marketplace listing) for the repository in the
-  Upbound console. Preview render: `_debug/icon-preview.png`.
+* **Marketplace listing is live** (2026-11-09):
+  https://marketplace.upbound.io/providers/codejourney/provider-wso2is shows the icon
+  (`extensions/icons/icon.svg`), the readme, release notes and the managed resources. The user
+  turned on Publish for the repository in the Upbound console.
 * Removed `install: true` from `docker/setup-buildx-action` in both repositories (this repo
   PR #5, Hostinger PR #12; `ci:` commits, so no release).
 * `.env` now also holds `XPKG_MIRROR_ACCESS_ID` and `XPKG_MIRROR_TOKEN` (the Hostinger robot).
@@ -132,8 +132,7 @@ remain). The repository is on GitHub with its first commit. The Upjet bug is rep
 
 ## Open items
 
-1. Check that the Marketplace listing for `codejourney/provider-wso2is` is live once the user
-   turns on Publish in the Upbound console.
+1. Nothing open for publishing.
 2. When Upjet fixes issue 810, consider replacing the identity provider workaround in
    `config/idp.go`. That changes the CRD fields, so it needs a new API version or a breaking
    change note.
