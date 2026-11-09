@@ -185,23 +185,24 @@ CROSSPLANE_NAMESPACE = crossplane-system
 -include build/makelib/local.xpkg.mk
 -include build/makelib/controlplane.mk
 
-# This target requires the following environment variables to be set:
-# - UPTEST_EXAMPLE_LIST, a comma-separated list of examples to test
-#   To ensure the proper functioning of the end-to-end test resource pre-deletion hook, it is crucial to arrange your resources appropriately.
-#   You can check the basic implementation here: https://github.com/crossplane/uptest/blob/main/internal/templates/03-delete.yaml.tmpl.
-# - UPTEST_CLOUD_CREDENTIALS (optional), multiple sets of AWS IAM User credentials specified as key=value pairs.
-#   The support keys are currently `DEFAULT` and `PEER`. So, an example for the value of this env. variable is:
-#   DEFAULT='[default]
-#   aws_access_key_id = REDACTED
-#   aws_secret_access_key = REDACTED'
-#   PEER='[default]
-#   aws_access_key_id = REDACTED
-#   aws_secret_access_key = REDACTED'
-#   The associated `ProviderConfig`s will be named as `default` and `peer`.
-# - UPTEST_DATASOURCE_PATH (optional), please see https://github.com/crossplane/uptest#injecting-dynamic-values-and-datasource
-uptest: $(UPTEST) $(KUBECTL) $(CHAINSAW) $(CROSSPLANE_CLI)
+# uptest runs examples against your own WSO2 Identity Server. It reads these variables from the
+# environment or from .env (see example.env); values in .env win:
+# - UPTEST_CLOUD_CREDENTIALS (required): the credentials JSON object that a ProviderConfig
+#   Secret holds, for example {"base_url": "https://id.example.com", "username": "admin", "password": "..."}.
+#   cluster/test/setup.sh puts it into the Secret wso2is-creds.
+# - UPTEST_EXAMPLE_LIST (required): a comma-separated list of examples to test.
+# - UPTEST_DATASOURCE_PATH (optional), see https://github.com/crossplane/uptest#injecting-dynamic-values-and-datasource
+# "make e2e" builds and deploys the provider to kind first; "make uptest" needs "make local-deploy" first.
+LOAD_DOTENV = set -a; if [ -f .env ]; then . ./.env; fi; set +a
+
+uptest.check:
+	@$(LOAD_DOTENV); \
+	if [ -z "$${UPTEST_CLOUD_CREDENTIALS:-}" ]; then echo "UPTEST_CLOUD_CREDENTIALS is not set. Add it to .env (see example.env)."; exit 1; fi; \
+	if [ -z "$${UPTEST_EXAMPLE_LIST:-}" ]; then echo "UPTEST_EXAMPLE_LIST is not set, for example: make e2e UPTEST_EXAMPLE_LIST=examples/cluster/identity/group.yaml"; exit 1; fi
+
+uptest: uptest.check $(UPTEST) $(KUBECTL) $(CHAINSAW) $(CROSSPLANE_CLI)
 	@$(INFO) running automated tests
-	@KUBECTL=$(KUBECTL) CHAINSAW=$(CHAINSAW) CROSSPLANE_CLI=$(CROSSPLANE_CLI) CROSSPLANE_NAMESPACE=$(CROSSPLANE_NAMESPACE) $(UPTEST) e2e "${UPTEST_EXAMPLE_LIST}" --data-source="${UPTEST_DATASOURCE_PATH}" --setup-script=cluster/test/setup.sh --default-conditions="Test" || $(FAIL)
+	@$(LOAD_DOTENV); KUBECTL=$(KUBECTL) CHAINSAW=$(CHAINSAW) CROSSPLANE_CLI=$(CROSSPLANE_CLI) CROSSPLANE_NAMESPACE=$(CROSSPLANE_NAMESPACE) $(UPTEST) e2e "$${UPTEST_EXAMPLE_LIST}" --data-source="$${UPTEST_DATASOURCE_PATH:-}" --setup-script=cluster/test/setup.sh --default-conditions="Test" || $(FAIL)
 	@$(OK) running automated tests
 
 local-deploy: build controlplane.up local.xpkg.deploy.provider.$(PROJECT_NAME)
@@ -210,7 +211,9 @@ local-deploy: build controlplane.up local.xpkg.deploy.provider.$(PROJECT_NAME)
 	@$(KUBECTL) -n crossplane-system wait --for=condition=Available deployment --all --timeout=5m
 	@$(OK) running locally built provider
 
-e2e: local-deploy uptest
+e2e: uptest.check local-deploy uptest
+
+.PHONY: uptest.check uptest local-deploy e2e
 
 crddiff: $(UPTEST)
 	@$(INFO) Checking breaking CRD schema changes
