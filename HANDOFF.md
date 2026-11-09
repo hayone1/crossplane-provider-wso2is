@@ -107,10 +107,17 @@ remain). The repository is on GitHub with its first commit. The Upjet bug is rep
 
 ## Open items
 
-1. Repository secrets, when the user wants to publish: `XPKG_MIRROR_ACCESS_ID` and
-   `XPKG_MIRROR_TOKEN` (Upbound mirror) and, for `/test-examples`,
-   `UPTEST_CLOUD_CREDENTIALS` (a credentials JSON object). Then set the repository variable
-   `RELEASE_ENABLED=true` and tag a release.
+1. **Publishing (in progress, 2026-11-09).** The repository secrets `XPKG_MIRROR_ACCESS_ID` and
+   `XPKG_MIRROR_TOKEN` are set (the same Upbound robot as the Hostinger provider, organization
+   `codejourney`). The robot token can push images but cannot use Upbound's account API, so it
+   cannot create repositories (`up repo create` and `up xpkg push --create` return
+   Unauthorized). Still needed, by the user in the Upbound console: create the public
+   repository `codejourney/provider-wso2is` with its Marketplace listing on, and give the
+   robot's team write access to it (the Hostinger repository has the same setup). Then set
+   `RELEASE_ENABLED=true` and run the Release workflow (first version: v0.1.0). After the
+   first run, make the GHCR package `hayone1/provider-wso2is` public (GitHub creates it
+   private; only the web UI can change that). `/test-examples` also needs
+   `UPTEST_CLOUD_CREDENTIALS`, which is optional.
 2. When Upjet fixes issue 810, consider replacing the identity provider workaround in
    `config/idp.go`. That changes the CRD fields, so it needs a new API version or a breaking
    change note.

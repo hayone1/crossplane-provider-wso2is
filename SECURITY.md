@@ -16,7 +16,7 @@ SPDX SBOM. The release notes give the commands for that release; in general
 (cosign v3 or later, older versions report "no signatures found"):
 
 ```sh
-DIGEST=$(crane digest ghcr.io/hayone1/provider-wso2is:v0.1.1)
+DIGEST=$(crane digest ghcr.io/hayone1/provider-wso2is:v0.1.0)
 cosign verify ghcr.io/hayone1/provider-wso2is@$DIGEST \
   --certificate-identity-regexp '^https://github.com/hayone1/crossplane-provider-wso2is/\.github/workflows/release\.yml@' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
