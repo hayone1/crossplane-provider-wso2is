@@ -1,0 +1,30 @@
+# A WSO2 Identity Server for local tests and for the Docker end-to-end job in CI.
+#
+#   make wso2.up     start it and wait until it answers (about two minutes)
+#   make wso2.down   stop it and delete its data
+#
+# The server has two addresses:
+#   https://localhost:9443  from your computer, for test/e2e/run.sh (the provider runs outside
+#                           the cluster)
+#   https://wso2is:9443     from pods in a kind cluster, for make e2e and make uptest (the
+#                           provider runs inside the cluster). The container joins kind's
+#                           Docker network under this name; make wso2.up creates the network
+#                           if no kind cluster exists yet.
+# Both use the self-signed certificate of the image, so set insecure_skip_verify. The admin
+# user is admin with the password admin.
+name: provider-wso2is
+
+services:
+  wso2is:
+    image: wso2/wso2is:7.3.0
+    ports:
+      - "127.0.0.1:9443:9443"
+    networks:
+      default: {}
+      kind:
+        aliases: [wso2is]
+
+networks:
+  kind:
+    name: kind
+    external: true

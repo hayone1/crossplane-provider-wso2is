@@ -84,20 +84,28 @@ Generating and compiling 104 resources needs a lot of memory. On a machine with 
   maximum supported version". Run it with the Go version of `go.mod` instead:
   `GOTOOLCHAIN=go1.26.10 make lint`.
 
+* **A test server.** `make wso2.up` starts WSO2 Identity Server 7.3.0 in Docker
+  (`compose.yaml`, the same server that CI uses) and waits until it answers. That takes about
+  two minutes. The admin user is `admin` with the password `admin`, and the certificate is
+  self-signed. `make wso2.down` stops the server and deletes its data. The values in
+  `example.env` fit this server, so `cp example.env .env` is enough. To test against your own
+  server, change the values in `.env`.
+
+  The server has two addresses. From your computer, it is `https://localhost:9443`. From pods
+  in a kind cluster, it is `https://wso2is:9443`, because the container also joins kind's
+  Docker network under that name. That is why `UPTEST_CLOUD_CREDENTIALS` uses the second
+  address.
+
 * **End-to-end tests** apply examples to a real server, wait until every managed resource is
   ready, watch for update loops, and delete the examples again. The script creates a kind
   cluster and runs the provider outside the cluster. It reads the server and the credentials
-  from `.env` or from the environment.
+  (`WSO2IS_*`) from `.env` or from the environment.
 
   ```shell
-  cp example.env .env     # then fill in your server
+  make wso2.up
   test/e2e/run.sh examples/cluster/identity/user.yaml examples/namespaced/claim/claim.yaml
   test/e2e/run.sh         # every example in both API variants
   ```
-
-  For a server in Docker on your computer, run `docker run -p 9443:9443 wso2/wso2is:7.3.0`,
-  and set `WSO2IS_BASE_URL=https://localhost:9443`, `WSO2IS_USERNAME=admin`,
-  `WSO2IS_PASSWORD=admin` and `WSO2IS_INSECURE_SKIP_VERIFY=true`.
 
   An example with the line `# e2e: tenant` manages objects inside a tenant. The script then
   creates a test tenant first and points the ProviderConfig `tenant` at it.
@@ -106,11 +114,12 @@ Generating and compiling 104 resources needs a lot of memory. On a machine with 
   locally built package into a kind cluster and waits until the provider is healthy.
 
 * **uptest** tests the packaged provider inside the cluster. For each example, it checks
-  apply, import and delete against your own server. CI does not run it, because it needs a
-  real server. Put `UPTEST_CLOUD_CREDENTIALS` into `.env` first. It holds the credentials JSON
-  object for your server (see `example.env`). Then run:
+  apply, import and delete. CI does not run it. It reads `UPTEST_CLOUD_CREDENTIALS` from
+  `.env`: the credentials JSON object for your server, as a ProviderConfig Secret holds it
+  (see `example.env`). Then run:
 
   ```shell
+  make wso2.up
   make e2e UPTEST_EXAMPLE_LIST=examples/cluster/identity/group.yaml,examples/namespaced/identity/role.yaml
   ```
 
@@ -137,7 +146,8 @@ Test both copies with `test/e2e/run.sh`.
 
 * `ci.yml` lints, runs the unit tests, checks that generated files are current, deploys the
   package to kind, and builds the artifacts.
-* `e2e-docker.yml` runs every example against WSO2 IS 7.3.0 in Docker, in both API variants.
+* `e2e-docker.yml` runs every example against WSO2 IS 7.3.0 in Docker (`make wso2.up`), in
+  both API variants.
 * `security.yml` runs govulncheck, CodeQL, gitleaks and the dependency review. `scorecard.yml`
   runs the OpenSSF Scorecard.
 * `release.yml` publishes a release after CI passes on `main`. The version follows from the

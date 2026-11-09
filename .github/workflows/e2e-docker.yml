@@ -1,8 +1,8 @@
 name: End to End (WSO2 in Docker)
 
-# Tests every example against a real WSO2 Identity Server 7.3.0 that runs in Docker next to a
-# kind cluster. The provider runs outside the cluster, so it reaches the server at
-# localhost:9443. The job needs no secrets and no paid server.
+# Tests every example against a real WSO2 Identity Server that runs in Docker (compose.yaml,
+# make wso2.up) next to a kind cluster. The provider runs outside the cluster, so it reaches
+# the server at localhost:9443. The job needs no secrets and no paid server.
 on:
   push:
     branches: [main]
@@ -20,11 +20,6 @@ jobs:
       fail-fast: false
       matrix:
         scope: [cluster, namespaced]
-    services:
-      wso2is:
-        image: wso2/wso2is:7.3.0
-        ports:
-          - 9443:9443
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -37,16 +32,8 @@ jobs:
       - name: Install kind
         run: go install sigs.k8s.io/kind@v0.33.0
 
-      - name: Wait for WSO2 Identity Server
-        run: |
-          for i in $(seq 1 90); do
-            if curl -sk -o /dev/null -w '%{http_code}' https://localhost:9443/api/health-check/v1.0/health | grep -q 200; then
-              exit 0
-            fi
-            sleep 5
-          done
-          echo "::error::WSO2 Identity Server did not start"
-          exit 1
+      - name: Start WSO2 Identity Server
+        run: make wso2.up
 
       - name: Run the examples
         env:

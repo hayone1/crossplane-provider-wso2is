@@ -30,3 +30,15 @@ updates:
     groups:
       actions:
         patterns: ['*']
+
+  # The WSO2 Identity Server image in compose.yaml. The provider targets WSO2 IS 7.3, so only
+  # patch releases are proposed; a new minor version needs its own testing.
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: test
+    ignore:
+      - dependency-name: wso2/wso2is
+        update-types: [version-update:semver-major, version-update:semver-minor]
