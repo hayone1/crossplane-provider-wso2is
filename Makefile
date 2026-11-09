@@ -213,7 +213,24 @@ local-deploy: build controlplane.up local.xpkg.deploy.provider.$(PROJECT_NAME)
 
 e2e: uptest.check local-deploy uptest
 
-.PHONY: uptest.check uptest local-deploy e2e
+# WSO2 Identity Server in Docker (compose.yaml), for test/e2e/run.sh, make e2e and make uptest.
+WSO2_HEALTH_URL = https://localhost:9443/api/health-check/v1.0/health
+
+wso2.up:
+	@echo "Starting WSO2 Identity Server in Docker..."
+	@docker network inspect kind >/dev/null 2>&1 || docker network create kind >/dev/null
+	@docker compose up -d --quiet-pull
+	@for i in $$(seq 1 90); do \
+		if [ "$$(curl -sk -o /dev/null -w '%{http_code}' $(WSO2_HEALTH_URL))" = 200 ]; then exit 0; fi; \
+		sleep 5; \
+	done; \
+	docker compose logs --tail 50 wso2is; echo "WSO2 Identity Server did not start within 7.5 minutes"; exit 1
+	@echo "WSO2 Identity Server is up at https://localhost:9443 (https://wso2is:9443 inside kind)."
+
+wso2.down:
+	@docker compose down --volumes
+
+.PHONY: uptest.check uptest local-deploy e2e wso2.up wso2.down
 
 crddiff: $(UPTEST)
 	@$(INFO) Checking breaking CRD schema changes
