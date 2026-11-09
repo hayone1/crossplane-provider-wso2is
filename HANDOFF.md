@@ -76,6 +76,16 @@ remain). The repository is on GitHub with its first commit. The Upjet bug is rep
 
 ## Done this session
 
+* **v0.1.0 is published** (2026-11-09): `ghcr.io/hayone1/provider-wso2is:v0.1.0` and
+  `xpkg.upbound.io/codejourney/provider-wso2is:v0.1.0`, the same digest, signed in both
+  registries, release https://github.com/hayone1/crossplane-provider-wso2is/releases/tag/v0.1.0.
+  Both registries allow anonymous pulls. `RELEASE_ENABLED=true` is set, so every `feat` or
+  `fix` commit on `main` now releases after CI passes. Checked: the package from Upbound
+  installed in a kind cluster with Crossplane 2.4.3, became Healthy, and created and deleted a
+  Group on the lab. Verify signatures with cosign v3, or add `--new-bundle-format` to cosign v2.
+  The Upbound robot (secrets `XPKG_MIRROR_*`) is the Hostinger one; the user created the
+  repository `codejourney/provider-wso2is` in the console and gave the robot's team access.
+
 * **terraform-provider-wso2is v0.1.2 is released** (2026-11-08) with the four fixes from the last
   session (reads without an ID, User Sharing API v2 note, deleted applications that the server
   still caches, member lists of a group or role that just disappeared). On the Terraform
@@ -107,17 +117,9 @@ remain). The repository is on GitHub with its first commit. The Upjet bug is rep
 
 ## Open items
 
-1. **Publishing (in progress, 2026-11-09).** The repository secrets `XPKG_MIRROR_ACCESS_ID` and
-   `XPKG_MIRROR_TOKEN` are set (the same Upbound robot as the Hostinger provider, organization
-   `codejourney`). The robot token can push images but cannot use Upbound's account API, so it
-   cannot create repositories (`up repo create` and `up xpkg push --create` return
-   Unauthorized). Still needed, by the user in the Upbound console: create the public
-   repository `codejourney/provider-wso2is` with its Marketplace listing on, and give the
-   robot's team write access to it (the Hostinger repository has the same setup). Then set
-   `RELEASE_ENABLED=true` and run the Release workflow (first version: v0.1.0). After the
-   first run, make the GHCR package `hayone1/provider-wso2is` public (GitHub creates it
-   private; only the web UI can change that). `/test-examples` also needs
-   `UPTEST_CLOUD_CREDENTIALS`, which is optional.
+1. `/test-examples` needs the secret `UPTEST_CLOUD_CREDENTIALS` (optional). The release
+   workflow warns that `docker/setup-buildx-action` v4 no longer has the `install` input
+   (harmless; Hostinger has the same line).
 2. When Upjet fixes issue 810, consider replacing the identity provider workaround in
    `config/idp.go`. That changes the CRD fields, so it needs a new API version or a breaking
    change note.
