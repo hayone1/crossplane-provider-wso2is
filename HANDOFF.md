@@ -38,7 +38,7 @@ remain). The repository is on GitHub with its first commit. The Upjet bug is rep
 * **Lint:** `golangci-lint run ./...` reports 0 issues (2026-11-08) (local golangci-lint 2.15.0, built with
   Go 1.27). `make lint` downloads v2.13.0, which cannot read Go 1.27 export data; run
   `GOTOOLCHAIN=go1.26.10 make lint` locally (CI installs Go 1.26 from go.mod).
-* **uptest** (`make uptest` against the lab, after `make local-deploy`): 7 examples with 11
+* **uptest** (`make e2e` or `make uptest` against the server in `.env`): 7 examples with 11
   managed resources, one or more per API area (applications, identity, claims, identity
   providers, organizations, notifications, settings), passed apply, import and delete.
 * **Package:** `make local-deploy` (with `PLATFORMS=linux_amd64` and a separate `KUBECONFIG`)
@@ -76,13 +76,17 @@ remain). The repository is on GitHub with its first commit. The Upjet bug is rep
 
 ## Done this session
 
-* `/test-examples` works (2026-11-09): the secret `UPTEST_CLOUD_CREDENTIALS` holds the lab
-  credentials JSON, and `/test-examples="examples/cluster/identity/group.yaml,examples/namespaced/identity/role.yaml"`
-  on PR #5 passed apply, import and delete; the lab was clean afterwards. A run with the
-  cluster-scoped and namespaced Group together fails with HTTP 409 (same group name on the
-  server); `contributing/development.md` says so. If the lab is destroyed, update or delete
-  that secret. The first comment was lost in a GitHub Actions incident; post it again when no
-  run starts.
+* **uptest runs locally only** (2026-11-09, at the user's request, because the lab will be
+  destroyed). The `/test-examples` workflow (`e2e.yaml`) and the secret
+  `UPTEST_CLOUD_CREDENTIALS` are gone. `make e2e` and `make uptest` load `.env`, where each
+  developer keeps `UPTEST_CLOUD_CREDENTIALS` (the credentials JSON, see `example.env`), and stop
+  early when it or `UPTEST_EXAMPLE_LIST` is missing. `make e2e UPTEST_EXAMPLE_LIST=examples/cluster/identity/group.yaml,examples/namespaced/identity/role.yaml`
+  passed apply, import and delete against the lab (log: `_debug/uptest-local.log`). Do not test
+  the cluster-scoped and namespaced example of one kind together: same server names, HTTP 409.
+* **Marketplace listing is live** (2026-11-09):
+  https://marketplace.upbound.io/providers/codejourney/provider-wso2is shows the icon
+  (`extensions/icons/icon.svg`), the readme, release notes and the managed resources. The user
+  turned on Publish for the repository in the Upbound console.
 * Removed `install: true` from `docker/setup-buildx-action` in both repositories (this repo
   PR #5, Hostinger PR #12; `ci:` commits, so no release).
 * `.env` now also holds `XPKG_MIRROR_ACCESS_ID` and `XPKG_MIRROR_TOKEN` (the Hostinger robot).
@@ -128,7 +132,7 @@ remain). The repository is on GitHub with its first commit. The Upjet bug is rep
 
 ## Open items
 
-1. Nothing is needed for publishing or `/test-examples` any more (see "Done this session").
+1. Nothing open for publishing.
 2. When Upjet fixes issue 810, consider replacing the identity provider workaround in
    `config/idp.go`. That changes the CRD fields, so it needs a new API version or a breaking
    change note.

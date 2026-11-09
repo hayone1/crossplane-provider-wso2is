@@ -105,6 +105,20 @@ Generating and compiling 104 resources needs a lot of memory. On a machine with 
 * **The package** builds with `make build`. `make local-deploy` installs Crossplane and the
   locally built package into a kind cluster and waits until the provider is healthy.
 
+* **uptest** tests the packaged provider inside the cluster. For each example, it checks
+  apply, import and delete against your own server. CI does not run it, because it needs a
+  real server. Put `UPTEST_CLOUD_CREDENTIALS` into `.env` first. It holds the credentials JSON
+  object for your server (see `example.env`). Then run:
+
+  ```shell
+  make e2e UPTEST_EXAMPLE_LIST=examples/cluster/identity/group.yaml,examples/namespaced/identity/role.yaml
+  ```
+
+  `make e2e` builds the package and deploys it to kind first. If the provider is already
+  deployed, run `make uptest` with the same variable. Do not test the cluster-scoped and the
+  namespaced example of the same kind in one run. They create objects with the same names on
+  the server, so the second one fails with HTTP 409.
+
 * **Running the provider outside a cluster.** Leader election is on by default, and it needs a
   namespace that only exists inside a cluster. `make run` and `test/e2e/run.sh` therefore pass
   `--no-leader-election`. Do the same when you start the binary yourself.
@@ -124,12 +138,6 @@ Test both copies with `test/e2e/run.sh`.
 * `ci.yml` lints, runs the unit tests, checks that generated files are current, deploys the
   package to kind, and builds the artifacts.
 * `e2e-docker.yml` runs every example against WSO2 IS 7.3.0 in Docker, in both API variants.
-* `e2e.yaml` runs uptest against your own server when a maintainer comments `/test-examples` on
-  a pull request. It needs the repository secret `UPTEST_CLOUD_CREDENTIALS`, which holds a
-  credentials JSON object. List the examples in quotes, separated by commas, for example
-  `/test-examples="examples/cluster/identity/group.yaml"`. Do not test the cluster-scoped and
-  the namespaced example of the same kind in one run. They create objects with the same names
-  on the server, so the second one fails with HTTP 409.
 * `security.yml` runs govulncheck, CodeQL, gitleaks and the dependency review. `scorecard.yml`
   runs the OpenSSF Scorecard.
 * `release.yml` publishes a release after CI passes on `main`. The version follows from the
