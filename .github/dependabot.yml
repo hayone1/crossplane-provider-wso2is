@@ -42,3 +42,11 @@ updates:
     ignore:
       - dependency-name: wso2/wso2is
         update-types: [version-update:semver-major, version-update:semver-minor]
+
+  # Keeps the digest-pinned distroless base image current.
+  - package-ecosystem: docker
+    directory: /cluster/images/provider-wso2is
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: fix(deps)
